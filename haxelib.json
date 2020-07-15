@@ -1,0 +1,14 @@
+{
+	"name" : "flixelutils",
+	"url" : "https://github.com/bitDecayGames/flixel-utils",
+	"license" : "MIT",
+	"tags": [""],
+	
+    "description" : "Set of haxeflixel utilities",
+    "version" : "0.1.0-alpha",
+	"releasenote" : "Initial attempt",
+	"contributors" : ["MondayHopscotch"],
+	"dependencies" : {
+		"flixel": "4.7.0"
+	}
+}
