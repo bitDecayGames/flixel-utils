@@ -1,10 +1,10 @@
-package com.bitdecay.flixel.camera;
+package com.bitdecay.flixel.extensions;
 
 import flixel.FlxG;
 import flixel.math.FlxPoint;
 import flixel.FlxCamera;
 
-class CameraUtils {
+class FlxCameraExt {
 	// getCenterPoint returns the world coordinate that the center of the given camera is located at
 	public static function getCenterPoint(cam:FlxCamera, ?p:FlxPoint):FlxPoint {
 		if (p == null) {
@@ -19,7 +19,7 @@ class CameraUtils {
 	}
 
 	// project will project a world point through a camera and produce a screen coordinate
-	public static function project(worldPoint:FlxPoint, cam:FlxCamera, ?p:FlxPoint):FlxPoint {
+	public static function project(cam:FlxCamera, worldPoint:FlxPoint, ?p:FlxPoint):FlxPoint {
 		if (p == null) {
 			p = FlxPoint.get();
 		}
@@ -36,7 +36,7 @@ class CameraUtils {
 	}
 
 	// unproject will take a screen coordinate and return a world coordinate via the given camera
-	public static function unproject(screenPoint:FlxPoint, cam:FlxCamera, ?p:FlxPoint):FlxPoint {
+	public static function unproject(cam:FlxCamera, screenPoint:FlxPoint, ?p:FlxPoint):FlxPoint {
 		if (p == null) {
 			p = FlxPoint.get();
 		}
