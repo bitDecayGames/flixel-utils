@@ -1,4 +1,4 @@
-package com.bitdecay.flixel.transitions;
+package bitdecay.flixel.transitions;
 
 import flixel.FlxG;
 import flixel.FlxSprite;
@@ -12,7 +12,7 @@ import openfl.geom.Point;
 import openfl.geom.Rectangle;
 
 using Math;
-using com.bitdecay.flixel.extensions.FlxPointExt;
+using bitdecay.flixel.extensions.FlxPointExt;
 
 /**
  *  A FlxSubState that creates a swirl effect then closes

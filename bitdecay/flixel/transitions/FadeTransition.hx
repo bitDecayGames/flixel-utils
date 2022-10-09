@@ -1,4 +1,4 @@
-package com.bitdecay.flixel.transitions;
+package bitdecay.flixel.transitions;
 
 import flixel.FlxSubState;
 import flixel.FlxG;

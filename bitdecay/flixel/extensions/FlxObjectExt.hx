@@ -1,4 +1,4 @@
-package com.bitdecay.flixel.extensions;
+package bitdecay.flixel.extensions;
 
 import flixel.FlxObject;
 

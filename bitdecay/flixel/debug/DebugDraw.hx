@@ -1,4 +1,4 @@
-package com.bitdecay.flixel.debug;
+package bitdecay.flixel.debug;
 
 import flixel.FlxG;
 import flixel.FlxBasic;
@@ -7,6 +7,8 @@ import flixel.math.FlxPoint;
 import openfl.display.Graphics;
 #end
 
+// A FlxPlugin to allow easy debug drawing. This automatically initlalizes
+// the plugin the first time the static `ME` is used.
 class DebugDraw extends FlxBasic {
 	public static var ME(get, null):DebugDraw;
 

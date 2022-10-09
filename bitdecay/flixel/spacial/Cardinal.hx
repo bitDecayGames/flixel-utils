@@ -1,4 +1,4 @@
-package com.bitdecay.flixel.spacial;
+package bitdecay.flixel.spacial;
 
 import flixel.FlxObject;
 import flixel.math.FlxAngle;

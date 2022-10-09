@@ -1,4 +1,4 @@
-package com.bitdecay.flixel.sorting;
+package bitdecay.flixel.sorting;
 
 import flixel.util.FlxSort;
 import flixel.FlxSprite;
@@ -9,6 +9,8 @@ enum VerticalReference {
 	BOTTOM;
 }
 
+// Sorting function intended to be provided to flixel sort(...) functions such as FlxGroup.sort(...).
+// This also allows a reference to be provided depending on sort preference.
 class ZSorting {
 	public static function getSort(vRef:VerticalReference): (Order:Int, FlxSprite, FlxSprite) -> Int {
 		return (order:Int, s1:FlxSprite, s2:FlxSprite) -> {

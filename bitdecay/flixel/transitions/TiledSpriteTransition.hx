@@ -4,6 +4,9 @@ import flixel.FlxSprite;
 import flixel.FlxG;
 import flixel.FlxSubState;
 
+// Transition using the provided sprite. It either tiles it across the screen, or stretches
+// it to fill the screen. It plays the specified animation, then calls the provided callback
+// and closes.
 class TiledSpriteTransition extends FlxSubState {
 	var callback:()->Void;
 
