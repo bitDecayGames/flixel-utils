@@ -30,14 +30,14 @@ enum abstract Cardinal(Int) from Int to Int {
 		}
 		v.set();
 
-		switch (c) {
+		switch (this) {
 			case NW | N | NE:
 				v.y = -1;
 			case SW | S | SE:
 				v.y = 1;
 			default:
 		}
-		switch (c) {
+		switch (this) {
 			case NE | E | SE:
 				v.x = 1;
 			case NW | W | SW:
@@ -80,9 +80,9 @@ enum abstract Cardinal(Int) from Int to Int {
 	**/
 	public static function fromFacing(facing:Int):Cardinal {
 		if (facing & FlxObject.UP != 0) {
-			if (facing & FlxObject.LEFT) {
+			if (facing & FlxObject.LEFT != 0) {
 				return NW;
-			} else if (facing & FlxOjbect.RIGHT) {
+			} else if (facing & FlxObject.RIGHT != 0) {
 				return NE;
 			} else {
 				return N;
@@ -90,9 +90,9 @@ enum abstract Cardinal(Int) from Int to Int {
 		}
 
 		if (facing & FlxObject.DOWN != 0) {
-			if (facing & FlxObject.LEFT) {
+			if (facing & FlxObject.LEFT != 0) {
 				return SW;
-			} else if (facing & FlxOjbect.RIGHT) {
+			} else if (facing & FlxObject.RIGHT != 0) {
 				return SE;
 			} else {
 				return S;
@@ -100,9 +100,9 @@ enum abstract Cardinal(Int) from Int to Int {
 		}
 
 		if (facing & FlxObject.LEFT != 0) {
-			if (facing & FlxObject.UP) {
+			if (facing & FlxObject.UP != 0) {
 				return NW;
-			} else if (facing & FlxOjbect.DOWN) {
+			} else if (facing & FlxObject.DOWN != 0) {
 				return SW;
 			} else {
 				return W;
@@ -110,9 +110,9 @@ enum abstract Cardinal(Int) from Int to Int {
 		}
 
 		if (facing & FlxObject.RIGHT != 0) {
-			if (facing & FlxObject.UP) {
+			if (facing & FlxObject.UP != 0) {
 				return NE;
-			} else if (facing & FlxOjbect.DOWN) {
+			} else if (facing & FlxObject.DOWN != 0) {
 				return SE;
 			} else {
 				return E;
