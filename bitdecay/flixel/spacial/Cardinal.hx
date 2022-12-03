@@ -28,9 +28,24 @@ enum abstract Cardinal(Int) from Int to Int {
 		if (v == null) {
 			v = FlxVector.get();
 		}
+		v.set();
 
-		v.set(0, -1).rotate(FlxPoint.weak(), this);
-		return v;
+		switch (c) {
+			case NW | N | NE:
+				v.y = -1;
+			case SW | S | SE:
+				v.y = 1;
+			default:
+		}
+		switch (c) {
+			case NE | E | SE:
+				v.x = 1;
+			case NW | W | SW:
+				v.x = -1;
+			default:
+		}
+
+		return v.normalize();
 	}
 
 	/**
@@ -58,6 +73,53 @@ enum abstract Cardinal(Int) from Int to Int {
 				facing |= FlxObject.LEFT;
 		}
 		return facing;
+	}
+
+	/**
+	 * Converts the given Flixel facing integer to a Cardinal
+	**/
+	public static function fromFacing(facing:Int):Cardinal {
+		if (facing & FlxObject.UP != 0) {
+			if (facing & FlxObject.LEFT) {
+				return NW;
+			} else if (facing & FlxOjbect.RIGHT) {
+				return NE;
+			} else {
+				return N;
+			}
+		}
+
+		if (facing & FlxObject.DOWN != 0) {
+			if (facing & FlxObject.LEFT) {
+				return SW;
+			} else if (facing & FlxOjbect.RIGHT) {
+				return SE;
+			} else {
+				return S;
+			}
+		}
+
+		if (facing & FlxObject.LEFT != 0) {
+			if (facing & FlxObject.UP) {
+				return NW;
+			} else if (facing & FlxOjbect.DOWN) {
+				return SW;
+			} else {
+				return W;
+			}
+		}
+
+		if (facing & FlxObject.RIGHT != 0) {
+			if (facing & FlxObject.UP) {
+				return NE;
+			} else if (facing & FlxOjbect.DOWN) {
+				return SE;
+			} else {
+				return E;
+			}
+		}
+
+		return NONE;
 	}
 
 	/**
@@ -145,6 +207,24 @@ enum abstract Cardinal(Int) from Int to Int {
 			} else {
 				return N;
 			}
+		}
+	}
+
+	/*
+	 * Experimental function that turns a cardinal into direction strings for use in animation names and the like
+	 */
+	public static function asUDLR(c:Cardinal):String {
+		switch(c) {
+			case N:
+				return "up";
+			case E:
+				return "right";
+			case S:
+				return "down";
+			case W:
+				return "left";
+			default:
+				return "none";
 		}
 	}
 }
