@@ -72,7 +72,7 @@ class DebugDraw extends FlxBasic {
 		});
 	}
 
-	public function drawWorldRect(x:Float, y:Float, width:Float, height:Float, color:Int = 0xFF00FF) {
+	public function drawWorldRect(x:Float, y:Float, width:Float, height:Float, color:Int = 0xFF00FF, thickness:Float = 1) {
 		calls.push((gfx) -> {
 			// TODO: This doesn't take any scroll factor into account. We'd need a better way to pass this in
 			tmpPoint.set(x, y).subtract(FlxG.camera.scroll.x, FlxG.camera.scroll.y);
@@ -87,12 +87,12 @@ class DebugDraw extends FlxBasic {
 					return;
 			}
 
-			gfx.lineStyle(1, color, 0.8);
+			gfx.lineStyle(thickness, color, 0.8);
 			gfx.drawRect(tmpPoint.x, tmpPoint.y, width, height);
 		});
 	}
 
-	public function drawCameraRect(x:Float, y:Float, width:Float, height:Float, color:Int = 0xFF00FF) {
+	public function drawCameraRect(x:Float, y:Float, width:Float, height:Float, color:Int = 0xFF00FF, thickness:Float = 1) {
 		calls.push((gfx) -> {
 			tmpPoint.set(x, y);
 			tmpPoint2.set(x + width, y + height);
@@ -106,7 +106,7 @@ class DebugDraw extends FlxBasic {
 					return;
 			}
 
-			gfx.lineStyle(1, color, 0.8);
+			gfx.lineStyle(thickness, color, 0.8);
 			gfx.drawRect(x, y, width, height);
 		});
 	}
@@ -127,7 +127,7 @@ class DebugDraw extends FlxBasic {
 		});
 	}
 
-	public function drawCameraLine(startX:Float, startY:Float, endX:Float, endY:Float, color:Int = 0xFF00FF) {
+	public function drawCameraLine(startX:Float, startY:Float, endX:Float, endY:Float, color:Int = 0xFF00FF, thickness:Float = 1) {
 		calls.push((gfx) -> {
 			tmpPoint.set(startX, startY);
 			tmpPoint2.set(endX, endY);
@@ -136,7 +136,7 @@ class DebugDraw extends FlxBasic {
 					// if we don't contain one point of the line, then don't draw it
 					return;
 			}
-			gfx.lineStyle(1, color, 0.8);
+			gfx.lineStyle(thickness, color, 0.8);
 			gfx.moveTo(startX, startY);
 			gfx.lineTo(endX, endY);
 		});
@@ -145,10 +145,10 @@ class DebugDraw extends FlxBasic {
 	// all no-ops when not in debug
 	public function drawWorldCircle(x:Float, y:Float, radius:Float, color:Int = 0x0, thickness:Float = 0) {}
 	public function drawCameraCircle(x:Float, y:Float, radius:Float, color:Int = 0x0, thickness:Float = 0) {}
-	public function drawWorldRect(x:Float, y:Float, width:Float, height:Float, color:Int = 0x0) {}
-	public function drawCameraRect(x:Float, y:Float, width:Float, height:Float, color:Int = 0x0) {}
-	public function drawWorldLine(startX:Float, startY:Float, endX:Float, endY:Float, color:Int = 0x0) {}
-	public function drawCameraLine(startX:Float, startY:Float, endX:Float, endY:Float, color:Int = 0x0) {}
+	public function drawWorldRect(x:Float, y:Float, width:Float, height:Float, color:Int = 0x0, thickness:Float = 0) {}
+	public function drawCameraRect(x:Float, y:Float, width:Float, height:Float, color:Int = 0x0, thickness:Float = 0) {}
+	public function drawWorldLine(startX:Float, startY:Float, endX:Float, endY:Float, color:Int = 0x0, thickness:Float = 0) {}
+	public function drawCameraLine(startX:Float, startY:Float, endX:Float, endY:Float, color:Int = 0x0, thickness:Float = 0) {}
 	#end
 
 	override function update(elapsed:Float) {
