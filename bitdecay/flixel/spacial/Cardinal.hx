@@ -213,8 +213,8 @@ enum abstract Cardinal(Int) from Int to Int {
 	/*
 	 * Experimental function that turns a cardinal into direction strings for use in animation names and the like
 	 */
-	public static function asUDLR(c:Cardinal):String {
-		switch(c) {
+	public function asUDLR():String {
+		switch(this) {
 			case N:
 				return "up";
 			case E:

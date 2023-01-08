@@ -30,6 +30,48 @@ class DebugDraw extends FlxBasic {
 	private var tmpPoint3 = FlxPoint.get();
 	private var tmpPoint4 = FlxPoint.get();
 
+	public function drawWorldCircle(x:Float, y:Float, radius:Float, color:Int = 0xFF00FF, thickness:Float = 1) {
+		calls.push((gfx) -> {
+			// TODO: This doesn't take any scroll factor into account. We'd need a better way to pass this in
+			tmpPoint.set(x - radius, y - radius).subtract(FlxG.camera.scroll.x, FlxG.camera.scroll.y);
+			tmpPoint2.set(x + radius, y + radius).subtract(FlxG.camera.scroll.x, FlxG.camera.scroll.y);
+			tmpPoint3.set(x + radius, y).subtract(FlxG.camera.scroll.x, FlxG.camera.scroll.y);
+			tmpPoint4.set(x, y + radius).subtract(FlxG.camera.scroll.x, FlxG.camera.scroll.y);
+			if (!(FlxG.camera.containsPoint(tmpPoint) ||
+				FlxG.camera.containsPoint(tmpPoint2) ||
+				FlxG.camera.containsPoint(tmpPoint3) ||
+				FlxG.camera.containsPoint(tmpPoint4))) {
+					// if we don't contain at least one point on the bounding box, then don't draw it
+					return;
+			}
+
+			tmpPoint.set(x, y).subtract(FlxG.camera.scroll.x, FlxG.camera.scroll.y);
+			gfx.lineStyle(thickness, color, 1);
+			gfx.drawCircle(tmpPoint.x, tmpPoint.y, radius);
+		});
+	}
+
+	public function drawCameraCircle(x:Float, y:Float, radius:Float, color:Int = 0xFF00FF, thickness:Float = 1) {
+		calls.push((gfx) -> {
+			// TODO: This doesn't take any scroll factor into account. We'd need a better way to pass this in
+			tmpPoint.set(x - radius, y - radius);
+			tmpPoint2.set(x + radius, y + radius);
+			tmpPoint3.set(x + radius, y);
+			tmpPoint4.set(x, y + radius);
+			if (!(FlxG.camera.containsPoint(tmpPoint) ||
+				FlxG.camera.containsPoint(tmpPoint2) ||
+				FlxG.camera.containsPoint(tmpPoint3) ||
+				FlxG.camera.containsPoint(tmpPoint4))) {
+					// if we don't contain at least one point on the bounding box, then don't draw it
+					return;
+			}
+
+			tmpPoint.set(x, y).subtract(FlxG.camera.scroll.x, FlxG.camera.scroll.y);
+			gfx.lineStyle(thickness, color, 1);
+			gfx.drawCircle(tmpPoint.x, tmpPoint.y, radius);
+		});
+	}
+
 	public function drawWorldRect(x:Float, y:Float, width:Float, height:Float, color:Int = 0xFF00FF) {
 		calls.push((gfx) -> {
 			// TODO: This doesn't take any scroll factor into account. We'd need a better way to pass this in
@@ -41,7 +83,7 @@ class DebugDraw extends FlxBasic {
 				FlxG.camera.containsPoint(tmpPoint2) ||
 				FlxG.camera.containsPoint(tmpPoint3) ||
 				FlxG.camera.containsPoint(tmpPoint4))) {
-					// if we don't contain one point on the rectangle, then don't draw it
+					// if we don't contain at least one point on the rectangle, then don't draw it
 					return;
 			}
 
@@ -60,7 +102,7 @@ class DebugDraw extends FlxBasic {
 				FlxG.camera.containsPoint(tmpPoint2) ||
 				FlxG.camera.containsPoint(tmpPoint3) ||
 				FlxG.camera.containsPoint(tmpPoint4))) {
-					// if we don't contain one point on the rectangle, then don't draw it
+					// if we don't contain at least one point on the rectangle, then don't draw it
 					return;
 			}
 
@@ -69,17 +111,17 @@ class DebugDraw extends FlxBasic {
 		});
 	}
 
-	public function drawWorldLine(startX:Float, startY:Float, endX:Float, endY:Float, color:Int = 0xFF00FF) {
+	public function drawWorldLine(startX:Float, startY:Float, endX:Float, endY:Float, color:Int = 0xFF00FF, thickness:Float = 1) {
 		calls.push((gfx) -> {
 			// TODO: This doesn't take any scroll factor into account. We'd need a better way to pass this in
 			tmpPoint.set(startX, startY).subtract(FlxG.camera.scroll.x, FlxG.camera.scroll.y);
 			tmpPoint2.set(endX, endY).subtract(FlxG.camera.scroll.x, FlxG.camera.scroll.y);
 			if (!(FlxG.camera.containsPoint(tmpPoint) ||
 				FlxG.camera.containsPoint(tmpPoint2))) {
-					// if we don't contain one point of the line, then don't draw it
+					// if we don't contain at least one point of the line, then don't draw it
 					return;
 			}
-			gfx.lineStyle(1, color, 0.8);
+			gfx.lineStyle(thickness, color, 0.8);
 			gfx.moveTo(tmpPoint.x, tmpPoint.y);
 			gfx.lineTo(tmpPoint2.x, tmpPoint2.y);
 		});
@@ -101,6 +143,8 @@ class DebugDraw extends FlxBasic {
 	}
 	#else
 	// all no-ops when not in debug
+	public function drawWorldCircle(x:Float, y:Float, radius:Float, color:Int = 0x0, thickness:Float = 0) {}
+	public function drawCameraCircle(x:Float, y:Float, radius:Float, color:Int = 0x0, thickness:Float = 0) {}
 	public function drawWorldRect(x:Float, y:Float, width:Float, height:Float, color:Int = 0x0) {}
 	public function drawCameraRect(x:Float, y:Float, width:Float, height:Float, color:Int = 0x0) {}
 	public function drawWorldLine(startX:Float, startY:Float, endX:Float, endY:Float, color:Int = 0x0) {}
