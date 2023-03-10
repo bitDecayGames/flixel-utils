@@ -1,4 +1,4 @@
-package states;
+package bitdecay.flixel.extensions;
 
 import config.Configure;
 import bitdecay.analytics.Bitlytics;

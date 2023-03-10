@@ -1,15 +1,14 @@
 package bitdecay.flixel.spacial;
 
-import flixel.FlxObject;
+import flixel.util.FlxDirectionFlags;
 import flixel.math.FlxAngle;
 import flixel.math.FlxPoint;
-import flixel.math.FlxVector;
 
 /**
  * Cardinal direction handling. Directly usable as their integer value in degrees
 **/
 enum abstract Cardinal(Int) from Int to Int {
-	private static var upZeroAngle = new FlxVector(0, -1);
+	private static var upZeroAngle = new FlxPoint(0, -1);
 	private static inline var halfAngle = 22.5;
 	var N = 0;
 	var NE = 45;
@@ -24,9 +23,9 @@ enum abstract Cardinal(Int) from Int to Int {
 	/**
 	 * Converts the given cardinal direction to a unit vector
 	**/
-	public function asVector(?v:FlxVector):FlxVector {
+	public function asVector(?v:FlxPoint):FlxPoint {
 		if (v == null) {
-			v = FlxVector.get();
+			v = FlxPoint.get();
 		}
 		v.set();
 
@@ -62,15 +61,15 @@ enum abstract Cardinal(Int) from Int to Int {
 		var facing = 0;
 		switch (this) {
 			case NW | N | NE:
-				facing |= FlxObject.UP;
+				facing |= FlxDirectionFlags.UP;
 			case SW | S | SE:
-				facing |= FlxObject.DOWN;
+				facing |= FlxDirectionFlags.DOWN;
 		}
 		switch (this) {
 			case NE | E | SE:
-				facing |= FlxObject.RIGHT;
+				facing |= FlxDirectionFlags.RIGHT;
 			case NW | W | SW:
-				facing |= FlxObject.LEFT;
+				facing |= FlxDirectionFlags.LEFT;
 		}
 		return facing;
 	}
@@ -79,40 +78,40 @@ enum abstract Cardinal(Int) from Int to Int {
 	 * Converts the given Flixel facing integer to a Cardinal
 	**/
 	public static function fromFacing(facing:Int):Cardinal {
-		if (facing & FlxObject.UP != 0) {
-			if (facing & FlxObject.LEFT != 0) {
+		if (facing & FlxDirectionFlags.UP != 0) {
+			if (facing & FlxDirectionFlags.LEFT != 0) {
 				return NW;
-			} else if (facing & FlxObject.RIGHT != 0) {
+			} else if (facing & FlxDirectionFlags.RIGHT != 0) {
 				return NE;
 			} else {
 				return N;
 			}
 		}
 
-		if (facing & FlxObject.DOWN != 0) {
-			if (facing & FlxObject.LEFT != 0) {
+		if (facing & FlxDirectionFlags.DOWN != 0) {
+			if (facing & FlxDirectionFlags.LEFT != 0) {
 				return SW;
-			} else if (facing & FlxObject.RIGHT != 0) {
+			} else if (facing & FlxDirectionFlags.RIGHT != 0) {
 				return SE;
 			} else {
 				return S;
 			}
 		}
 
-		if (facing & FlxObject.LEFT != 0) {
-			if (facing & FlxObject.UP != 0) {
+		if (facing & FlxDirectionFlags.LEFT != 0) {
+			if (facing & FlxDirectionFlags.UP != 0) {
 				return NW;
-			} else if (facing & FlxObject.DOWN != 0) {
+			} else if (facing & FlxDirectionFlags.DOWN != 0) {
 				return SW;
 			} else {
 				return W;
 			}
 		}
 
-		if (facing & FlxObject.RIGHT != 0) {
-			if (facing & FlxObject.UP != 0) {
+		if (facing & FlxDirectionFlags.RIGHT != 0) {
+			if (facing & FlxDirectionFlags.UP != 0) {
 				return NE;
-			} else if (facing & FlxObject.DOWN != 0) {
+			} else if (facing & FlxDirectionFlags.DOWN != 0) {
 				return SE;
 			} else {
 				return E;
@@ -165,7 +164,7 @@ enum abstract Cardinal(Int) from Int to Int {
 	/**
 	 * Finds the closest cardinal for the given vector
 	**/
-	public static function closest(vec:FlxVector, fourDirection:Bool = false):Cardinal {
+	public static function closest(vec:FlxPoint, fourDirection:Bool = false):Cardinal {
 		// degrees: 0 is straight right, we want it to be straight up
 		var angle = vec.degrees + 90;
 		while (angle < 0) {
