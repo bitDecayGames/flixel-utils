@@ -1,21 +1,25 @@
 package bitdecay.flixel.debug;
 
+import flixel.FlxCamera;
 import flixel.FlxG;
-import flixel.FlxBasic;
-#if FLX_DEBUG
 import flixel.math.FlxPoint;
-import openfl.display.Graphics;
-#end
+import flixel.FlxBasic;
 
-// A FlxPlugin to allow easy debug drawing. This automatically initlalizes
-// the plugin the first time the static `ME` is used.
 class DebugDraw extends FlxBasic {
 	public static var ME(get, null):DebugDraw;
+	public static var enabled = true;
 
 	static function get_ME():DebugDraw {
 		if (ME == null) {
-			FlxG.plugins.add(ME = new DebugDraw());
-			#if !FLX_DEBUG
+			ME = new DebugDraw();
+			#if FLX_DEBUG
+			FlxG.plugins.add(ME);
+
+			FlxG.console.registerFunction("debugdraw", function() {
+				enabled = !enabled;
+				FlxG.log.notice('DebugDraw enabled: $enabled');
+			});
+			#else
 			FlxG.log.error("DebugDraw called without debug flag enabled");
 			#end
 		}
@@ -24,87 +28,133 @@ class DebugDraw extends FlxBasic {
 	}
 
 	#if FLX_DEBUG
-	private var calls:Array<(Graphics)->Void> = [];
+	private var calls:Array<()->Void> = [];
 	private var tmpPoint = FlxPoint.get();
 	private var tmpPoint2 = FlxPoint.get();
 	private var tmpPoint3 = FlxPoint.get();
 	private var tmpPoint4 = FlxPoint.get();
 
-	public function drawWorldRect(x:Float, y:Float, width:Float, height:Float, color:Int = 0xFF00FF) {
-		calls.push((gfx) -> {
+	public function drawWorldRect(?cam:FlxCamera, x:Float, y:Float, width:Float, height:Float, color:Int = 0xFF00FF) {
+		if (!enabled) {
+			return;
+		}
+
+		calls.push(() -> {
+			var renderCam = cam;
+
+			if (renderCam == null) {
+				renderCam = FlxG.camera;
+			}
+
 			// TODO: This doesn't take any scroll factor into account. We'd need a better way to pass this in
-			tmpPoint.set(x, y).subtract(FlxG.camera.scroll.x, FlxG.camera.scroll.y);
-			tmpPoint2.set(x + width, y + height).subtract(FlxG.camera.scroll.x, FlxG.camera.scroll.y);
-			tmpPoint3.set(x + width, y).subtract(FlxG.camera.scroll.x, FlxG.camera.scroll.y);
-			tmpPoint4.set(x, y + height).subtract(FlxG.camera.scroll.x, FlxG.camera.scroll.y);
-			if (!(FlxG.camera.containsPoint(tmpPoint) ||
-				FlxG.camera.containsPoint(tmpPoint2) ||
-				FlxG.camera.containsPoint(tmpPoint3) ||
-				FlxG.camera.containsPoint(tmpPoint4))) {
+			tmpPoint.set(x, y).subtract(renderCam.scroll.x, renderCam.scroll.y);
+			tmpPoint2.set(x + width, y + height).subtract(renderCam.scroll.x, renderCam.scroll.y);
+			tmpPoint3.set(x + width, y).subtract(renderCam.scroll.x, renderCam.scroll.y);
+			tmpPoint4.set(x, y + height).subtract(renderCam.scroll.x, renderCam.scroll.y);
+			if (!(renderCam.containsPoint(tmpPoint) ||
+				renderCam.containsPoint(tmpPoint2) ||
+				renderCam.containsPoint(tmpPoint3) ||
+				renderCam.containsPoint(tmpPoint4))) {
 					// if we don't contain one point on the rectangle, then don't draw it
 					return;
 			}
 
+			var gfx = renderCam.debugLayer.graphics;
 			gfx.lineStyle(1, color, 0.8);
 			gfx.drawRect(tmpPoint.x, tmpPoint.y, width, height);
 		});
 	}
 
-	public function drawCameraRect(x:Float, y:Float, width:Float, height:Float, color:Int = 0xFF00FF) {
-		calls.push((gfx) -> {
+	public function drawCameraRect(?cam:FlxCamera, x:Float, y:Float, width:Float, height:Float, color:Int = 0xFF00FF) {
+		if (!enabled) {
+			return;
+		}
+
+		calls.push(() -> {
+			var renderCam = cam;
+
+			if (renderCam == null) {
+				renderCam = FlxG.camera;
+			}
+
 			tmpPoint.set(x, y);
 			tmpPoint2.set(x + width, y + height);
 			tmpPoint3.set(x + width, y);
 			tmpPoint4.set(x, y + height);
-			if (!(FlxG.camera.containsPoint(tmpPoint) ||
-				FlxG.camera.containsPoint(tmpPoint2) ||
-				FlxG.camera.containsPoint(tmpPoint3) ||
-				FlxG.camera.containsPoint(tmpPoint4))) {
+			if (!(renderCam.containsPoint(tmpPoint) ||
+				renderCam.containsPoint(tmpPoint2) ||
+				renderCam.containsPoint(tmpPoint3) ||
+				renderCam.containsPoint(tmpPoint4))) {
 					// if we don't contain one point on the rectangle, then don't draw it
 					return;
 			}
 
+			var gfx = renderCam.debugLayer.graphics;
 			gfx.lineStyle(1, color, 0.8);
 			gfx.drawRect(x, y, width, height);
 		});
 	}
 
-	public function drawWorldLine(startX:Float, startY:Float, endX:Float, endY:Float, color:Int = 0xFF00FF) {
-		calls.push((gfx) -> {
+	public function drawWorldLine(?cam:FlxCamera, startX:Float, startY:Float, endX:Float, endY:Float, color:Int = 0xFF00FF) {
+		if (!enabled) {
+			return;
+		}
+
+		calls.push(() -> {
+			var renderCam = cam;
+
+			if (renderCam == null) {
+				renderCam = FlxG.camera;
+			}
 			// TODO: This doesn't take any scroll factor into account. We'd need a better way to pass this in
-			tmpPoint.set(startX, startY).subtract(FlxG.camera.scroll.x, FlxG.camera.scroll.y);
-			tmpPoint2.set(endX, endY).subtract(FlxG.camera.scroll.x, FlxG.camera.scroll.y);
-			if (!(FlxG.camera.containsPoint(tmpPoint) ||
-				FlxG.camera.containsPoint(tmpPoint2))) {
+			tmpPoint.set(startX, startY).subtract(renderCam.scroll.x, renderCam.scroll.y);
+			tmpPoint2.set(endX, endY).subtract(renderCam.scroll.x, renderCam.scroll.y);
+			if (!(renderCam.containsPoint(tmpPoint) ||
+				renderCam.containsPoint(tmpPoint2))) {
 					// if we don't contain one point of the line, then don't draw it
 					return;
 			}
+
+			var gfx = renderCam.debugLayer.graphics;
 			gfx.lineStyle(1, color, 0.8);
 			gfx.moveTo(tmpPoint.x, tmpPoint.y);
 			gfx.lineTo(tmpPoint2.x, tmpPoint2.y);
 		});
 	}
 
-	public function drawCameraLine(startX:Float, startY:Float, endX:Float, endY:Float, color:Int = 0xFF00FF) {
-		calls.push((gfx) -> {
+	public function drawCameraLine(?cam:FlxCamera, startX:Float, startY:Float, endX:Float, endY:Float, color:Int = 0xFF00FF) {
+		if (!enabled) {
+			return;
+		}
+
+		calls.push(() -> {
+			var renderCam = cam;
+
+			if (renderCam == null) {
+				renderCam = FlxG.camera;
+			}
+
+
 			tmpPoint.set(startX, startY);
 			tmpPoint2.set(endX, endY);
-			if (!(FlxG.camera.containsPoint(tmpPoint) ||
-				FlxG.camera.containsPoint(tmpPoint2))) {
+			if (!(renderCam.containsPoint(tmpPoint) ||
+				renderCam.containsPoint(tmpPoint2))) {
 					// if we don't contain one point of the line, then don't draw it
 					return;
 			}
+
+			var gfx = renderCam.debugLayer.graphics;
 			gfx.lineStyle(1, color, 0.8);
 			gfx.moveTo(startX, startY);
 			gfx.lineTo(endX, endY);
 		});
 	}
 	#else
-	// all no-ops when not in debug
-	public function drawWorldRect(x:Float, y:Float, width:Float, height:Float, color:Int = 0x0) {}
-	public function drawCameraRect(x:Float, y:Float, width:Float, height:Float, color:Int = 0x0) {}
-	public function drawWorldLine(startX:Float, startY:Float, endX:Float, endY:Float, color:Int = 0x0) {}
-	public function drawCameraLine(startX:Float, startY:Float, endX:Float, endY:Float, color:Int = 0x0) {}
+	// all no-ops when not in debug. Inline to save function call if compiler doesn't optimize it out
+	public inline function drawWorldRect(?cam:FlxCamera, x:Float, y:Float, width:Float, height:Float, color:Int = 0xFF00FF) {}
+	public inline function drawCameraRect(?cam:FlxCamera, x:Float, y:Float, width:Float, height:Float, color:Int = 0xFF00FF) {}
+	public inline function drawWorldLine(?cam:FlxCamera, startX:Float, startY:Float, endX:Float, endY:Float, color:Int = 0xFF00FF) {}
+	public inline function drawCameraLine(?cam:FlxCamera, startX:Float, startY:Float, endX:Float, endY:Float, color:Int = 0xFF00FF) {}
 	#end
 
 	override function update(elapsed:Float) {
@@ -115,12 +165,17 @@ class DebugDraw extends FlxBasic {
 		super.draw();
 
 		#if FLX_DEBUG
+		if (!enabled) {
+			return;
+		}
+
+		FlxG.watch.addQuick('debug draw calls: ', calls.length);
 		if (calls.length == 0) {
 			return;
 		}
 
 		for (drawCall in calls) {
-			drawCall(FlxG.camera.debugLayer.graphics);
+			drawCall();
 		}
 		calls = [];
 		#end
