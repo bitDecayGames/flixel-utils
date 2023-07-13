@@ -1,30 +1,96 @@
 package bitdecay.flixel.debug;
 
+import flixel.util.FlxColor;
+import openfl.display.BitmapData;
+import bitdecay.flixel.debug.DebuggerWindow;
+import flixel.system.ui.FlxSystemButton;
 import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.math.FlxPoint;
 import flixel.FlxBasic;
 
 class DebugDraw extends FlxBasic {
-	public static var ME(get, null):DebugDraw;
-	public static var enabled = true;
+	public static var ME(default, null):DebugDraw;
+	public static var enabled(default, set) = true;
 
-	static function get_ME():DebugDraw {
+	static var icon_data = [
+		[0, 0, 0, .5, 1, 1, 1, .5, 0, 0 ,0],
+		[0, .5, 1, 1, .5, 0, .5, 1, 1, .5, 0],
+		[1, 1, .5, 0, 0, 0, 0, 0, .5, 1, 1],
+		[0, .5, 1, 1, .5, 0, .5, 1, 1, .5, 0],
+		[0, 0, 0, .5, 1, 1, 1, .5, 0, 0 ,0],
+		[1, 1, .5, 0, 0, 0, 0, 0, .5, 1, 1],
+		[0, .5, 1, 1, .5, 0, .5, 1, 1, .5, 0],
+		[0, 0, 0, .5, 1, 1, 1, .5, 0, 0 ,0],
+		[1, 1, .5, 0, 0, 0, 0, 0, .5, 1, 1],
+		[0, .5, 1, 1, .5, 0, .5, 1, 1, .5, 0],
+		[0, 0, 0, .5, 1, 1, 1, .5, 0, 0 ,0]];
+
+	// TODO: Can we draw this to a separate intermediate graphic rather than
+	// relying on a camera for debug drawing
+	public static var layer_enabled:Map<String, Bool> = [];
+	private static var defaultLayer = "";
+
+	static var draw_debug_button:FlxSystemButton;
+	static var debug_window:DebuggerWindow;
+
+	private static var registeredConsole = false;
+
+	/**
+	 * Initializes the debug drawer. Layers typically should be a list of enums provided by `Type.allEnums(<enum class>)`
+	 * and will be used to initialize the layers as well as the buttons in the debug layer window
+	**/
+	public static function init(layers:Array<Dynamic> = null, force:Bool = false) {
+		if (force && ME != null) {
+			FlxG.plugins.remove(ME);
+			ME.destroy();
+			ME = null;
+
+			layers = [];
+		}
+
+		if (layers == null || layers.length == 0) {
+			defaultLayer = "ALL";
+			layer_enabled[defaultLayer] = true;
+		} else {
+			defaultLayer = layers[0];
+			for (l in layers) {
+				layer_enabled[l] = true;
+			}
+		}
+
 		if (ME == null) {
-			ME = new DebugDraw();
 			#if FLX_DEBUG
-			FlxG.plugins.add(ME);
+			FlxG.plugins.add(ME = new DebugDraw());
+			#end
+		}
 
+		#if FLX_DEBUG
+		if (!registeredConsole) {
 			FlxG.console.registerFunction("debugdraw", function() {
 				enabled = !enabled;
 				FlxG.log.notice('DebugDraw enabled: $enabled');
 			});
-			#else
-			FlxG.log.error("DebugDraw called without debug flag enabled");
-			#end
 		}
 
-		return ME;
+		if (draw_debug_button == null)
+		{
+			var icon = new BitmapData(11, 11, true, FlxColor.TRANSPARENT);
+			for (y in 0...icon_data.length) {
+				for (x in 0...icon_data[y].length) {
+					if (icon_data[y][x] > 0) {
+						icon.setPixel32(x, y, FlxColor.fromRGBFloat(1, 1, 1, icon_data[y][x]));
+					}
+				}
+			}
+
+			debug_window = new DebuggerWindow(icon);
+			FlxG.game.debugger.addWindow(debug_window);
+
+			draw_debug_button = FlxG.debugger.addButton(RIGHT, icon, () -> enabled = !enabled, true, true);
+		}
+		enabled = enabled;
+		#end
 	}
 
 	#if FLX_DEBUG
@@ -34,8 +100,12 @@ class DebugDraw extends FlxBasic {
 	private var tmpPoint3 = FlxPoint.get();
 	private var tmpPoint4 = FlxPoint.get();
 
-	public function drawWorldRect(?cam:FlxCamera, x:Float, y:Float, width:Float, height:Float, color:Int = 0xFF00FF) {
-		if (!enabled) {
+	public function drawWorldRect(?cam:FlxCamera, x:Float, y:Float, width:Float, height:Float, layer:Dynamic = null, color:Int = 0xFF00FF) {
+		if (layer == null) {
+			layer = defaultLayer;
+		}
+
+		if (!enabled || !layer_enabled[layer]) {
 			return;
 		}
 
@@ -65,8 +135,12 @@ class DebugDraw extends FlxBasic {
 		});
 	}
 
-	public function drawCameraRect(?cam:FlxCamera, x:Float, y:Float, width:Float, height:Float, color:Int = 0xFF00FF) {
-		if (!enabled) {
+	public function drawCameraRect(?cam:FlxCamera, x:Float, y:Float, width:Float, height:Float, layer:Dynamic = null, color:Int = 0xFF00FF) {
+		if (layer == null) {
+			layer = defaultLayer;
+		}
+
+		if (!enabled || !layer_enabled[layer]) {
 			return;
 		}
 
@@ -95,8 +169,12 @@ class DebugDraw extends FlxBasic {
 		});
 	}
 
-	public function drawWorldLine(?cam:FlxCamera, startX:Float, startY:Float, endX:Float, endY:Float, color:Int = 0xFF00FF) {
-		if (!enabled) {
+	public function drawWorldLine(?cam:FlxCamera, startX:Float, startY:Float, endX:Float, endY:Float, layer:Dynamic = null, color:Int = 0xFF00FF) {
+		if (layer == null) {
+			layer = defaultLayer;
+		}
+
+		if (!enabled || !layer_enabled[layer]) {
 			return;
 		}
 
@@ -122,8 +200,12 @@ class DebugDraw extends FlxBasic {
 		});
 	}
 
-	public function drawCameraLine(?cam:FlxCamera, startX:Float, startY:Float, endX:Float, endY:Float, color:Int = 0xFF00FF) {
-		if (!enabled) {
+	public function drawCameraLine(?cam:FlxCamera, startX:Float, startY:Float, endX:Float, endY:Float, layer:Dynamic = null, color:Int = 0xFF00FF) {
+		if (layer == null) {
+			layer = defaultLayer;
+		}
+
+		if (!enabled || !layer_enabled[layer]) {
 			return;
 		}
 
@@ -151,10 +233,10 @@ class DebugDraw extends FlxBasic {
 	}
 	#else
 	// all no-ops when not in debug. Inline to save function call if compiler doesn't optimize it out
-	public inline function drawWorldRect(?cam:FlxCamera, x:Float, y:Float, width:Float, height:Float, color:Int = 0xFF00FF) {}
-	public inline function drawCameraRect(?cam:FlxCamera, x:Float, y:Float, width:Float, height:Float, color:Int = 0xFF00FF) {}
-	public inline function drawWorldLine(?cam:FlxCamera, startX:Float, startY:Float, endX:Float, endY:Float, color:Int = 0xFF00FF) {}
-	public inline function drawCameraLine(?cam:FlxCamera, startX:Float, startY:Float, endX:Float, endY:Float, color:Int = 0xFF00FF) {}
+	public inline function drawWorldRect(?cam:FlxCamera, x:Float, y:Float, width:Float, height:Float, layer:Dynamic = null, color:Int = 0xFF00FF) {}
+	public inline function drawCameraRect(?cam:FlxCamera, x:Float, y:Float, width:Float, height:Float, layer:Dynamic = null, color:Int = 0xFF00FF) {}
+	public inline function drawWorldLine(?cam:FlxCamera, startX:Float, startY:Float, endX:Float, endY:Float, layer:Dynamic = null, color:Int = 0xFF00FF) {}
+	public inline function drawCameraLine(?cam:FlxCamera, startX:Float, startY:Float, endX:Float, endY:Float, layer:Dynamic = null, color:Int = 0xFF00FF) {}
 	#end
 
 	override function update(elapsed:Float) {
@@ -179,5 +261,15 @@ class DebugDraw extends FlxBasic {
 		}
 		calls = [];
 		#end
+	}
+
+	static function set_enabled(value:Bool) {
+		#if FLX_DEBUG
+		if (draw_debug_button != null) draw_debug_button.toggled = !value;
+
+		DebugDraw.enabled = value;
+		debug_window.visible = value;
+		#end
+		return enabled = value;
 	}
 }
