@@ -1,5 +1,7 @@
 package bitdecay.flixel.debug;
 
+import flixel.math.FlxRect;
+import openfl.display.Graphics;
 import flixel.util.FlxColor;
 import openfl.display.BitmapData;
 import bitdecay.flixel.debug.DebuggerWindow;
@@ -88,17 +90,21 @@ class DebugDraw extends FlxBasic {
 			FlxG.game.debugger.addWindow(debug_window);
 
 			draw_debug_button = FlxG.debugger.addButton(RIGHT, icon, () -> enabled = !enabled, true, true);
+			draw_debug_button.toggled = !FlxG.debugger.drawDebug;
 		}
-		enabled = enabled;
+		enabled = FlxG.debugger.drawDebug;
 		#end
 	}
 
 	#if FLX_DEBUG
+	public var lastCallCount(default, null):Int = 0;
+
 	private var calls:Array<()->Void> = [];
 	private var tmpPoint = FlxPoint.get();
 	private var tmpPoint2 = FlxPoint.get();
-	private var tmpPoint3 = FlxPoint.get();
-	private var tmpPoint4 = FlxPoint.get();
+
+	private var tmpRect = FlxRect.get();
+	private var tmpRect2 = FlxRect.get();
 
 	public function drawWorldRect(?cam:FlxCamera, x:Float, y:Float, width:Float, height:Float, layer:Dynamic = null, color:Int = 0xFF00FF) {
 		if (layer == null) {
@@ -117,21 +123,15 @@ class DebugDraw extends FlxBasic {
 			}
 
 			// TODO: This doesn't take any scroll factor into account. We'd need a better way to pass this in
-			tmpPoint.set(x, y).subtract(renderCam.scroll.x, renderCam.scroll.y);
-			tmpPoint2.set(x + width, y + height).subtract(renderCam.scroll.x, renderCam.scroll.y);
-			tmpPoint3.set(x + width, y).subtract(renderCam.scroll.x, renderCam.scroll.y);
-			tmpPoint4.set(x, y + height).subtract(renderCam.scroll.x, renderCam.scroll.y);
-			if (!(renderCam.containsPoint(tmpPoint) ||
-				renderCam.containsPoint(tmpPoint2) ||
-				renderCam.containsPoint(tmpPoint3) ||
-				renderCam.containsPoint(tmpPoint4))) {
-					// if we don't contain one point on the rectangle, then don't draw it
-					return;
+			tmpRect.set(x - renderCam.scroll.x, y - renderCam.scroll.y, width, height);
+			renderCam.getViewMarginRect(tmpRect2);
+			if (!tmpRect.overlaps(tmpRect2)) {
+				return;
 			}
 
 			var gfx = renderCam.debugLayer.graphics;
 			gfx.lineStyle(1, color, 0.8);
-			gfx.drawRect(tmpPoint.x, tmpPoint.y, width, height);
+			gfx.drawRect(tmpRect.x, tmpRect.y, tmpRect.width, tmpRect.height);
 		});
 	}
 
@@ -151,22 +151,26 @@ class DebugDraw extends FlxBasic {
 				renderCam = FlxG.camera;
 			}
 
-			tmpPoint.set(x, y);
-			tmpPoint2.set(x + width, y + height);
-			tmpPoint3.set(x + width, y);
-			tmpPoint4.set(x, y + height);
-			if (!(renderCam.containsPoint(tmpPoint) ||
-				renderCam.containsPoint(tmpPoint2) ||
-				renderCam.containsPoint(tmpPoint3) ||
-				renderCam.containsPoint(tmpPoint4))) {
-					// if we don't contain one point on the rectangle, then don't draw it
-					return;
+			tmpRect.set(x, y, width, height);
+			renderCam.getViewMarginRect(tmpRect2);
+			if (!tmpRect.overlaps(tmpRect2)) {
+				return;
 			}
 
 			var gfx = renderCam.debugLayer.graphics;
 			gfx.lineStyle(1, color, 0.8);
 			gfx.drawRect(x, y, width, height);
 		});
+	}
+
+	private static function lineRectOverlap(p0:FlxPoint, p1:FlxPoint, rect:FlxRect):Bool {
+		// Routine adapted from aek's post in this thread: https://www.lexaloffle.com/bbs/?tid=39127
+		var testL = (rect.left - p0.x) / (p1.x - p0.x);
+		var testR = (rect.right - p0.x) / (p1.x - p0.x);
+		var testT = (rect.top - p0.y) / (p1.y - p0.y);
+		var testB = (rect.bottom - p0.y) / (p1.y - p0.y);
+		return Math.max(0, Math.max(Math.min(testL, testR), Math.min(testT, testB))) <
+		Math.min(1, Math.min(Math.max(testL, testR), Math.max(testT, testB)));
 	}
 
 	public function drawWorldLine(?cam:FlxCamera, startX:Float, startY:Float, endX:Float, endY:Float, layer:Dynamic = null, color:Int = 0xFF00FF) {
@@ -185,12 +189,11 @@ class DebugDraw extends FlxBasic {
 				renderCam = FlxG.camera;
 			}
 			// TODO: This doesn't take any scroll factor into account. We'd need a better way to pass this in
+			renderCam.getViewMarginRect(tmpRect);
 			tmpPoint.set(startX, startY).subtract(renderCam.scroll.x, renderCam.scroll.y);
 			tmpPoint2.set(endX, endY).subtract(renderCam.scroll.x, renderCam.scroll.y);
-			if (!(renderCam.containsPoint(tmpPoint) ||
-				renderCam.containsPoint(tmpPoint2))) {
-					// if we don't contain one point of the line, then don't draw it
-					return;
+			if (!lineRectOverlap(tmpPoint, tmpPoint2, tmpRect)) {
+				return;
 			}
 
 			var gfx = renderCam.debugLayer.graphics;
@@ -216,13 +219,11 @@ class DebugDraw extends FlxBasic {
 				renderCam = FlxG.camera;
 			}
 
-
+			renderCam.getViewMarginRect(tmpRect);
 			tmpPoint.set(startX, startY);
 			tmpPoint2.set(endX, endY);
-			if (!(renderCam.containsPoint(tmpPoint) ||
-				renderCam.containsPoint(tmpPoint2))) {
-					// if we don't contain one point of the line, then don't draw it
-					return;
+			if (!lineRectOverlap(tmpPoint, tmpPoint2, tmpRect2)) {
+				return;
 			}
 
 			var gfx = renderCam.debugLayer.graphics;
@@ -231,12 +232,84 @@ class DebugDraw extends FlxBasic {
 			gfx.lineTo(endX, endY);
 		});
 	}
+
+	public function drawWorldCircle(?cam:FlxCamera, x:Float, y:Float, radius:Float, layer:Dynamic = null, color:Int = 0xFF00FF) {
+		if (layer == null) {
+			layer = defaultLayer;
+		}
+
+		if (!enabled || !layer_enabled[layer]) {
+			return;
+		}
+
+		calls.push(() -> {
+			var renderCam = cam;
+
+			if (renderCam == null) {
+				renderCam = FlxG.camera;
+			}
+
+			tmpPoint.set(x, y).subtract(renderCam.scroll.x, renderCam.scroll.y);
+			renderCam.getViewMarginRect(tmpRect);
+			getCenterPoint(tmpRect, tmpPoint2);
+			if (Math.abs(tmpPoint.x - tmpPoint2.x) > renderCam.viewWidth/2 + radius ||
+				Math.abs(tmpPoint.y - tmpPoint2.y) > renderCam.viewHeight/2 + radius) {
+				return;
+			}
+
+			var gfx = renderCam.debugLayer.graphics;
+			gfx.lineStyle(1, color, 0.8);
+			gfx.drawCircle(tmpPoint.x, tmpPoint.y, radius);
+		});
+	}
+
+	public function drawCameraCircle(?cam:FlxCamera, x:Float, y:Float, radius:Float, layer:Dynamic = null, color:Int = 0xFF00FF) {
+		if (layer == null) {
+			layer = defaultLayer;
+		}
+
+		if (!enabled || !layer_enabled[layer]) {
+			return;
+		}
+
+		calls.push(() -> {
+			var renderCam = cam;
+
+			if (renderCam == null) {
+				renderCam = FlxG.camera;
+			}
+
+			tmpPoint.set(x, y);
+			renderCam.getViewMarginRect(tmpRect);
+			getCenterPoint(tmpRect, tmpPoint2);
+			if (Math.abs(tmpPoint.x - tmpPoint2.x) > renderCam.viewWidth/2 + radius ||
+				Math.abs(tmpPoint.y - tmpPoint2.y) > renderCam.viewHeight/2 + radius) {
+				return;
+			}
+
+			var gfx = renderCam.debugLayer.graphics;
+			gfx.lineStyle(1, color, 0.8);
+			gfx.drawCircle(tmpPoint.x, tmpPoint.y, radius);
+		});
+	}
+
+	private static function getCenterPoint(rect:FlxRect, ?point:FlxPoint):FlxPoint {
+		if (point == null) {
+			point = FlxPoint.get();
+		}
+
+		point.set((rect.right - rect.left) / 2, (rect.bottom - rect.top) / 2);
+		return point;
+	}
+
 	#else
 	// all no-ops when not in debug. Inline to save function call if compiler doesn't optimize it out
 	public inline function drawWorldRect(?cam:FlxCamera, x:Float, y:Float, width:Float, height:Float, layer:Dynamic = null, color:Int = 0xFF00FF) {}
 	public inline function drawCameraRect(?cam:FlxCamera, x:Float, y:Float, width:Float, height:Float, layer:Dynamic = null, color:Int = 0xFF00FF) {}
 	public inline function drawWorldLine(?cam:FlxCamera, startX:Float, startY:Float, endX:Float, endY:Float, layer:Dynamic = null, color:Int = 0xFF00FF) {}
 	public inline function drawCameraLine(?cam:FlxCamera, startX:Float, startY:Float, endX:Float, endY:Float, layer:Dynamic = null, color:Int = 0xFF00FF) {}
+	public inline function drawWorldCircle(?cam:FlxCamera, x:Float, y:Float, radius:Float, layer:Dynamic = null, color:Int = 0xFF00FF) {}
+	public inline function drawCameraCircle(?cam:FlxCamera, x:Float, y:Float, radius:Float, layer:Dynamic = null, color:Int = 0xFF00FF) {}
 	#end
 
 	override function update(elapsed:Float) {
@@ -251,7 +324,7 @@ class DebugDraw extends FlxBasic {
 			return;
 		}
 
-		FlxG.watch.addQuick('debug draw calls: ', calls.length);
+		lastCallCount = calls.length;
 		if (calls.length == 0) {
 			return;
 		}
