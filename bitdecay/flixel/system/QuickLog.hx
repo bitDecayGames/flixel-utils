@@ -8,30 +8,27 @@ class QuickLog {
 	public static inline function notice(msg:String) {
 		#if FLX_DEBUG
 		FlxG.log.notice(msg);
-		#else
-		trace('NOTICE: $msg');
 		#end
+		trace('NOTICE: $msg');
 	}
 
 	public static inline function warn(msg:String) {
 		#if FLX_DEBUG
 		FlxG.log.warn(msg);
-		#else
-		trace('WARN: $msg');
 		#end
+		trace('WARN: $msg');
 	}
 
 	public static inline function error(msg:String) {
 		#if FLX_DEBUG
 		FlxG.log.error(msg);
-		#else
-		trace('ERROR: $msg');
 		#end
+		trace('ERROR: $msg');
 	}
 
 	public static inline function critical(msg:String) {
 		#if FLX_DEBUG
-		FlxG.log.error(msg);
+		FlxG.log.error('CRITICAL: $msg');
 		#else
 		throw 'CRITICAL: $msg';
 		#end
