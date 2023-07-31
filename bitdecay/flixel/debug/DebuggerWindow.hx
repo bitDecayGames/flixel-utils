@@ -1,5 +1,6 @@
 package bitdecay.flixel.debug;
 
+#if FLX_DEBUG
 import flixel.FlxG;
 import openfl.display.BitmapData;
 import bitdecay.flixel.debug.DebugDraw;
@@ -80,3 +81,4 @@ class DebuggerWindow extends Window {
 		}
 	}
 }
+#end
