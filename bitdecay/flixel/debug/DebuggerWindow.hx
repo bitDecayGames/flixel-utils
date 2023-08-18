@@ -59,10 +59,7 @@ class DebuggerWindow extends Window {
 		minSize.y = nextY;
 
 		updateSize();
-
-		#if FLX_SAVE
 		loadData();
-		#end
 	}
 
 	var _currentTime:Int;
@@ -94,7 +91,6 @@ class DebuggerWindow extends Window {
 		FlxG.save.flush();
 	}
 
-	#if FLX_SAVE
 	function loadData() {
 		if (!FlxG.save.isBound)
 			return;
@@ -120,6 +116,5 @@ class DebuggerWindow extends Window {
 	function initDebugLayerSave() {
 		FlxG.save.data.debugLayers = [for (name => _ in DebugDraw.layer_enabled) name=>true ];
 	}
-	#end
 }
 #end
