@@ -23,6 +23,8 @@ class DebuggerWindow extends Window {
 
 	private var callCountLabel:TextField;
 
+	private var labels = new Map<String, TextField>();
+
 	public function new(icon:BitmapData) {
 		super("Layers", icon, 0, 0, false);
 
@@ -45,9 +47,9 @@ class DebuggerWindow extends Window {
 			layerLabel.backgroundColor = FlxColor.WHITE;
 			layerLabel.text = layerName;
 			layerLabel.addEventListener(MouseEvent.CLICK, (me) -> {
-				DebugDraw.layer_enabled[layerName] = !DebugDraw.layer_enabled[layerName];
-				layerLabel.backgroundColor = DebugDraw.layer_enabled[layerName] ? FlxColor.WHITE : FlxColor.GRAY;
+				toggle(layerName);
 			});
+			labels.set(layerName, layerLabel);
 
 			nextY += Std.int(layerLabel.height + gutter);
 			minSize.x = Math.max(minSize.x, layerLabel.width);
@@ -57,6 +59,10 @@ class DebuggerWindow extends Window {
 		minSize.y = nextY;
 
 		updateSize();
+
+		#if FLX_SAVE
+		loadData();
+		#end
 	}
 
 	var _currentTime:Int;
@@ -80,5 +86,40 @@ class DebuggerWindow extends Window {
 			callCountLabel.text = 'Draw Calls: ${DebugDraw.ME.lastCallCount}';
 		}
 	}
+
+	function toggle(layerName:String) {
+		DebugDraw.layer_enabled[layerName] = !DebugDraw.layer_enabled[layerName];
+		labels[layerName].backgroundColor = DebugDraw.layer_enabled[layerName] ? FlxColor.WHITE : FlxColor.GRAY;
+		FlxG.save.data.debugLayers.set(layerName, DebugDraw.layer_enabled[layerName]);
+		FlxG.save.flush();
+	}
+
+	#if FLX_SAVE
+	function loadData() {
+		if (!FlxG.save.isBound)
+			return;
+
+		if (FlxG.save.data.debugLayers == null)
+		{
+			initDebugLayerSave();
+			FlxG.save.flush();
+		}
+
+		for (key => value in DebugDraw.layer_enabled) {
+			if (!FlxG.save.data.debugLayers.exists(key)) {
+				FlxG.save.data.debugLayers.set(key, value);
+			}
+
+			if (!FlxG.save.data.debugLayers.get(key)) {
+				DebugDraw.layer_enabled[key] = false;
+				labels.get(key).backgroundColor = FlxColor.GRAY;
+			}
+		}
+	}
+
+	function initDebugLayerSave() {
+		FlxG.save.data.debugLayers = [for (name => _ in DebugDraw.layer_enabled) name=>true ];
+	}
+	#end
 }
 #end
