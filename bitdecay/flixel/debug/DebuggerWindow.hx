@@ -23,6 +23,11 @@ class DebuggerWindow extends Window {
 
 	private var callCountLabel:TextField;
 
+	private var collapseLabel:TextField;
+	private var collapsed:Bool = false;
+	private var fullSizeMin:Float = 0;
+	private var collapsedSizeMin:Float = 0;
+
 	private var labels = new Map<String, TextField>();
 
 	public function new(icon:BitmapData) {
@@ -31,12 +36,28 @@ class DebuggerWindow extends Window {
 		var gutter:Int = 5;
 		var nextY:Int = Std.int(_header.height) + gutter;
 
+		collapseLabel = DebuggerUtil.createTextField(gutter, nextY, FlxColor.BLACK, TEXT_SIZE);
+		collapseLabel.border = true;
+		collapseLabel.borderColor = FlxColor.BLACK;
+		collapseLabel.background = true;
+		collapseLabel.backgroundColor = FlxColor.WHITE;
+		collapseLabel.text = "Collapse";
+		collapseLabel.addEventListener(MouseEvent.CLICK, (me) -> {
+			collapsed = !collapsed;
+			updateCollapse();
+		});
+		addChild(collapseLabel);
+
+		nextY += Std.int(collapseLabel.height + gutter);
+
 		addChild(callCountLabel = DebuggerUtil.createTextField(gutter, nextY, FlxColor.WHITE, TEXT_SIZE));
 		callCountLabel.text = "Draw Calls: ---";
 
 		minSize.x = callCountLabel.width;
 
 		nextY += Std.int(callCountLabel.height + gutter);
+
+		collapsedSizeMin = nextY;
 
 		for (layerName => _ in DebugDraw.layer_enabled) {
 			var layerLabel = DebuggerUtil.createTextField(gutter, nextY, FlxColor.BLACK, TEXT_SIZE);
@@ -56,9 +77,9 @@ class DebuggerWindow extends Window {
 		}
 
 		minSize.x += gutter * 2;
-		minSize.y = nextY;
+		fullSizeMin = nextY;
 
-		updateSize();
+		updateCollapse();
 		loadData();
 	}
 
@@ -82,6 +103,26 @@ class DebuggerWindow extends Window {
 		if (_updateTimer > UPDATE_DELAY) {
 			callCountLabel.text = 'Draw Calls: ${DebugDraw.ME.lastCallCount}';
 		}
+	}
+
+	function updateCollapse() {
+			if (collapsed) {
+				collapseLabel.text = "Expand";
+				minSize.y = collapsedSizeMin;
+				maxSize.y = collapsedSizeMin;
+			} else {
+				collapseLabel.text = "Collapse";
+				minSize.y = fullSizeMin;
+				maxSize.y = fullSizeMin;
+			}
+			collapseLabel.visible = false;
+			collapseLabel.visible = true;
+
+			for (l in labels) {
+				l.visible = !collapsed;
+			}
+
+			updateSize();
 	}
 
 	function toggle(layerName:String) {

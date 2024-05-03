@@ -71,7 +71,7 @@ class DebugDraw extends FlxBasic {
 		}
 
 		if (ME == null) {
-			FlxG.plugins.add(ME = new DebugDraw());
+			FlxG.plugins.addPlugin(ME = new DebugDraw());
 		}
 
 		if (!registeredConsole) {
