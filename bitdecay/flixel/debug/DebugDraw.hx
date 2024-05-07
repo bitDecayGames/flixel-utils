@@ -71,7 +71,7 @@ class DebugDraw extends FlxBasic {
 		}
 
 		if (ME == null) {
-			FlxG.plugins.add(ME = new DebugDraw());
+			FlxG.plugins.addPlugin(ME = new DebugDraw());
 		}
 
 		if (!registeredConsole) {
@@ -129,17 +129,8 @@ class DebugDraw extends FlxBasic {
 			if (renderCam == null) {
 				renderCam = FlxG.camera;
 			}
-
-			// TODO: This doesn't take any scroll factor into account. We'd need a better way to pass this in
 			tmpRect.set(x - renderCam.scroll.x, y - renderCam.scroll.y, width, height);
-			renderCam.getViewMarginRect(tmpRect2);
-			if (!tmpRect.overlaps(tmpRect2)) {
-				return;
-			}
-
-			var gfx = renderCam.debugLayer.graphics;
-			gfx.lineStyle(1, color, 0.8);
-			gfx.drawRect(tmpRect.x, tmpRect.y, tmpRect.width, tmpRect.height);
+			drawRectInner(renderCam, tmpRect, color);
 		});
 	}
 
@@ -160,24 +151,8 @@ class DebugDraw extends FlxBasic {
 			}
 
 			tmpRect.set(x, y, width, height);
-			renderCam.getViewMarginRect(tmpRect2);
-			if (!tmpRect.overlaps(tmpRect2)) {
-				return;
-			}
-
-			var gfx = renderCam.debugLayer.graphics;
-			gfx.lineStyle(1, color, 0.8);
-			gfx.drawRect(x, y, width, height);
+			drawRectInner(renderCam, tmpRect, color);
 		});
-	}
-
-	private static function lineRectOverlap(p0:FlxPoint, p1:FlxPoint, rect:FlxRect):Bool {
-		// Routine adapted from aek's post in this thread: https://www.lexaloffle.com/bbs/?tid=39127
-		var testL = (rect.left - p0.x) / (p1.x - p0.x);
-		var testR = (rect.right - p0.x) / (p1.x - p0.x);
-		var testT = (rect.top - p0.y) / (p1.y - p0.y);
-		var testB = (rect.bottom - p0.y) / (p1.y - p0.y);
-		return Math.max(0, Math.max(Math.min(testL, testR), Math.min(testT, testB))) < Math.min(1, Math.min(Math.max(testL, testR), Math.max(testT, testB)));
 	}
 
 	public function drawWorldLine(?cam:FlxCamera, startX:Float, startY:Float, endX:Float, endY:Float, layer:Dynamic = null, color:Int = 0xFF00FF) {
@@ -195,18 +170,9 @@ class DebugDraw extends FlxBasic {
 			if (renderCam == null) {
 				renderCam = FlxG.camera;
 			}
-			// TODO: This doesn't take any scroll factor into account. We'd need a better way to pass this in
-			renderCam.getViewMarginRect(tmpRect);
 			tmpPoint.set(startX, startY).subtract(renderCam.scroll.x, renderCam.scroll.y);
 			tmpPoint2.set(endX, endY).subtract(renderCam.scroll.x, renderCam.scroll.y);
-			if (!lineRectOverlap(tmpPoint, tmpPoint2, tmpRect)) {
-				return;
-			}
-
-			var gfx = renderCam.debugLayer.graphics;
-			gfx.lineStyle(1, color, 0.8);
-			gfx.moveTo(tmpPoint.x, tmpPoint.y);
-			gfx.lineTo(tmpPoint2.x, tmpPoint2.y);
+			drawLineInner(renderCam, tmpPoint, tmpPoint2, color);
 		});
 	}
 
@@ -226,17 +192,9 @@ class DebugDraw extends FlxBasic {
 				renderCam = FlxG.camera;
 			}
 
-			renderCam.getViewMarginRect(tmpRect);
 			tmpPoint.set(startX, startY);
 			tmpPoint2.set(endX, endY);
-			if (!lineRectOverlap(tmpPoint, tmpPoint2, tmpRect2)) {
-				return;
-			}
-
-			var gfx = renderCam.debugLayer.graphics;
-			gfx.lineStyle(1, color, 0.8);
-			gfx.moveTo(startX, startY);
-			gfx.lineTo(endX, endY);
+			drawLineInner(renderCam, tmpPoint, tmpPoint2, color);
 		});
 	}
 
@@ -257,16 +215,7 @@ class DebugDraw extends FlxBasic {
 			}
 
 			tmpPoint.set(x, y).subtract(renderCam.scroll.x, renderCam.scroll.y);
-			renderCam.getViewMarginRect(tmpRect);
-			getCenterPoint(tmpRect, tmpPoint2);
-			if (Math.abs(tmpPoint.x - tmpPoint2.x) > renderCam.viewWidth / 2 + radius
-				|| Math.abs(tmpPoint.y - tmpPoint2.y) > renderCam.viewHeight / 2 + radius) {
-				return;
-			}
-
-			var gfx = renderCam.debugLayer.graphics;
-			gfx.lineStyle(1, color, 0.8);
-			gfx.drawCircle(tmpPoint.x, tmpPoint.y, radius);
+			drawCircleInner(renderCam, tmpPoint, radius, color);
 		});
 	}
 
@@ -287,17 +236,53 @@ class DebugDraw extends FlxBasic {
 			}
 
 			tmpPoint.set(x, y);
-			renderCam.getViewMarginRect(tmpRect);
-			getCenterPoint(tmpRect, tmpPoint2);
-			if (Math.abs(tmpPoint.x - tmpPoint2.x) > renderCam.viewWidth / 2 + radius
-				|| Math.abs(tmpPoint.y - tmpPoint2.y) > renderCam.viewHeight / 2 + radius) {
-				return;
-			}
-
-			var gfx = renderCam.debugLayer.graphics;
-			gfx.lineStyle(1, color, 0.8);
-			gfx.drawCircle(tmpPoint.x, tmpPoint.y, radius);
+			drawCircleInner(renderCam, tmpPoint, radius, color);
 		});
+	}
+
+	private function drawRectInner(renderCam:FlxCamera, rect:FlxRect, color:Int) {
+		renderCam.getViewMarginRect(tmpRect2);
+		if (!tmpRect.overlaps(tmpRect2)) {
+			return;
+		}
+
+		var gfx = renderCam.debugLayer.graphics;
+		gfx.lineStyle(1, color, 0.8);
+		gfx.drawRect(rect.x, rect.y, rect.width, rect.height);
+	}
+
+	private function drawLineInner(renderCam:FlxCamera, start:FlxPoint, end:FlxPoint, color:Int) {
+		renderCam.getViewMarginRect(tmpRect);
+		if (!lineRectOverlap(tmpPoint, tmpPoint2, tmpRect)) {
+			return;
+		}
+
+		var gfx = renderCam.debugLayer.graphics;
+		gfx.lineStyle(1, color, 0.8);
+		gfx.moveTo(start.x, start.y);
+		gfx.lineTo(end.x, end.y);
+	}
+
+	private function drawCircleInner(renderCam:FlxCamera, center:FlxPoint, radius:Float, color:Int) {
+		renderCam.getViewMarginRect(tmpRect);
+		getCenterPoint(tmpRect, tmpPoint2);
+		if (Math.abs(tmpPoint.x - tmpPoint2.x) > renderCam.viewWidth / 2 + radius
+			|| Math.abs(tmpPoint.y - tmpPoint2.y) > renderCam.viewHeight / 2 + radius) {
+			return;
+		}
+
+		var gfx = renderCam.debugLayer.graphics;
+		gfx.lineStyle(1, color, 0.8);
+		gfx.drawCircle(tmpPoint.x, tmpPoint.y, radius);
+	}
+
+	private static function lineRectOverlap(p0:FlxPoint, p1:FlxPoint, rect:FlxRect):Bool {
+		// Routine adapted from aek's post in this thread: https://www.lexaloffle.com/bbs/?tid=39127
+		var testL = (rect.left - p0.x) / (p1.x - p0.x);
+		var testR = (rect.right - p0.x) / (p1.x - p0.x);
+		var testT = (rect.top - p0.y) / (p1.y - p0.y);
+		var testB = (rect.bottom - p0.y) / (p1.y - p0.y);
+		return Math.max(0, Math.max(Math.min(testL, testR), Math.min(testT, testB))) < Math.min(1, Math.min(Math.max(testL, testR), Math.max(testT, testB)));
 	}
 
 	private static function getCenterPoint(rect:FlxRect, ?point:FlxPoint):FlxPoint {
