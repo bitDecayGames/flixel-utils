@@ -95,9 +95,8 @@ class DebugDraw extends FlxBasic {
 			FlxG.game.debugger.addWindow(debug_window);
 
 			draw_debug_button = FlxG.debugger.addButton(RIGHT, icon, () -> enabled = !enabled, true, true);
-			draw_debug_button.toggled = !FlxG.debugger.drawDebug;
 		}
-		enabled = FlxG.debugger.drawDebug;
+		enabled = debug_window.enabled(); // TODO: This is kinda circular... clean it up
 		#else
 		// if we aren't in debug, just set this to the no-op implementation
 		ME = new DebugDraw();
@@ -323,6 +322,9 @@ class DebugDraw extends FlxBasic {
 
 		DebugDraw.enabled = value;
 		debug_window.visible = value;
+		FlxG.save.data.bitdecayDebug.enabled = value;
+		FlxG.save.flush();
+
 		return enabled = value;
 	}
 	#else

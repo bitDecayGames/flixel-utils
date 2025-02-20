@@ -79,8 +79,8 @@ class DebuggerWindow extends Window {
 		minSize.x += gutter * 2;
 		fullSizeMin = nextY;
 
-		updateCollapse();
 		loadData();
+		updateCollapse();
 	}
 
 	var _currentTime:Int;
@@ -123,12 +123,28 @@ class DebuggerWindow extends Window {
 			}
 
 			updateSize();
+			bound();
+			reposition(x, y);
+
+			FlxG.save.data.bitdecayDebug.collapsed = collapsed;
+			FlxG.save.flush();
+	}
+
+	public function enabled():Bool {
+		if (!FlxG.save.isBound)
+			return false;
+
+		if (FlxG.save.data.bitdecayDebug == null) {
+			initDebugLayerSave();
+		}
+
+		return FlxG.save.data.bitdecayDebug.enabled;
 	}
 
 	function toggle(layerName:String) {
 		DebugDraw.layer_enabled[layerName] = !DebugDraw.layer_enabled[layerName];
 		labels[layerName].backgroundColor = DebugDraw.layer_enabled[layerName] ? FlxColor.WHITE : FlxColor.GRAY;
-		FlxG.save.data.debugLayers.set(layerName, DebugDraw.layer_enabled[layerName]);
+		FlxG.save.data.bitdecayDebug.layers.set(layerName, DebugDraw.layer_enabled[layerName]);
 		FlxG.save.flush();
 	}
 
@@ -136,26 +152,43 @@ class DebuggerWindow extends Window {
 		if (!FlxG.save.isBound)
 			return;
 
-		if (FlxG.save.data.debugLayers == null)
+		if (FlxG.save.data.bitdecayDebug == null)
 		{
 			initDebugLayerSave();
-			FlxG.save.flush();
 		}
 
 		for (key => value in DebugDraw.layer_enabled) {
-			if (!FlxG.save.data.debugLayers.exists(key)) {
-				FlxG.save.data.debugLayers.set(key, value);
+			if (!FlxG.save.data.bitdecayDebug.layers.exists(key)) {
+				FlxG.save.data.bitdecayDebug.layers.set(key, value);
 			}
 
-			if (!FlxG.save.data.debugLayers.get(key)) {
+			if (!FlxG.save.data.bitdecayDebug.layers.get(key)) {
 				DebugDraw.layer_enabled[key] = false;
 				labels.get(key).backgroundColor = FlxColor.GRAY;
 			}
 		}
+
+		collapsed = FlxG.save.data.bitdecayDebug.collapsed;
+		reposition(FlxG.save.data.bitdecayDebug.windowX, FlxG.save.data.bitdecayDebug.windowY);
 	}
 
 	function initDebugLayerSave() {
-		FlxG.save.data.debugLayers = [for (name => _ in DebugDraw.layer_enabled) name=>true ];
+		FlxG.save.data.bitdecayDebug = {
+			enabled: false,
+			collapsed: false,
+			windowX: 0,
+			windowY: 0,
+			layers: [for (name => _ in DebugDraw.layer_enabled) name=>true ]
+		};
+		FlxG.save.flush();
+	}
+
+	override function reposition(X:Float, Y:Float) {
+		super.reposition(X, Y);
+
+		FlxG.save.data.bitdecayDebug.windowX = X;
+		FlxG.save.data.bitdecayDebug.windowY = Y;
+		FlxG.save.flush();
 	}
 }
 #end
