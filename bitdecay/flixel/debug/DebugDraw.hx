@@ -1,5 +1,6 @@
 package bitdecay.flixel.debug;
 
+import openfl.geom.Matrix;
 import openfl.text.TextFormat;
 import openfl.text.TextField;
 import openfl.display.BitmapData;
@@ -115,6 +116,8 @@ class DebugDraw extends FlxBasic {
 	private var tmpRect = FlxRect.get();
 	private var tmpRect2 = FlxRect.get();
 
+	// Matrix to aid in getting text to render where we want on-screen
+	private var textMatrix = new Matrix();
 	private var textFormat:TextFormat = null;
 
 	public function setDrawFont(name:String, size:Int) {
@@ -264,7 +267,7 @@ class DebugDraw extends FlxBasic {
 			}
 
 			tmpPoint.set(x, y);
-			drawTextInner(renderCam, tmpPoint, text, size, color);
+			drawTextInner(renderCam, tmpPoint, text, size, layer, color);
 		});
 	}
 
@@ -285,7 +288,7 @@ class DebugDraw extends FlxBasic {
 			}
 
 			tmpPoint.set(x, y).subtract(renderCam.scroll.x, renderCam.scroll.y);
-			drawTextInner(renderCam, tmpPoint, text, size, color);
+			drawTextInner(renderCam, tmpPoint, text, size, layer, color);
 		});
 	}
 
@@ -293,7 +296,7 @@ class DebugDraw extends FlxBasic {
 		var textField = new TextField();
 
 		if (textFormat == null) {
-			textFormat = new TextFormat(size, 0xFFFFFF);
+			textFormat = new TextFormat(size, color);
 		}
 
 		textField.text = text;
@@ -309,8 +312,9 @@ class DebugDraw extends FlxBasic {
 		bitmapData.draw(textField);
 
 		var gfx = renderCam.debugLayer.graphics;
-		gfx.lineStyle();
-		gfx.beginBitmapFill(bitmapData);
+		textMatrix.identity(); // Reset our matrix
+		textMatrix.translate(p.x, p.y);
+		gfx.beginBitmapFill(bitmapData, textMatrix);
 		gfx.drawRect(p.x, p.y, bitmapData.width, bitmapData.height);
 		gfx.endFill();
 	}
