@@ -1,5 +1,7 @@
 package bitdecay.flixel.debug;
 
+import openfl.text.TextFormat;
+import openfl.text.TextField;
 import openfl.display.BitmapData;
 import openfl.display.Graphics;
 
@@ -112,6 +114,12 @@ class DebugDraw extends FlxBasic {
 
 	private var tmpRect = FlxRect.get();
 	private var tmpRect2 = FlxRect.get();
+
+	private var textFormat:TextFormat = null;
+
+	public function setDrawFont(name:String, size:Int) {
+		textFormat = new TextFormat(name, size, 0xFFFFFF);
+	}
 
 	public function drawWorldRect(?cam:FlxCamera, x:Float, y:Float, width:Float, height:Float, layer:Dynamic = null, color:Int = 0xFF00FF) {
 		if (layer == null) {
@@ -239,6 +247,74 @@ class DebugDraw extends FlxBasic {
 		});
 	}
 
+	public function drawCameraText(?cam:FlxCamera, x:Float, y:Float, text:String, size:Int = 10, layer:Dynamic = null, color:Int = 0xFF00FF) {
+		if (layer == null) {
+			layer = defaultLayer;
+		}
+
+		if (!enabled || !layer_enabled[layer]) {
+			return;
+		}
+
+		calls.push(() -> {
+			var renderCam = cam;
+
+			if (renderCam == null) {
+				renderCam = FlxG.camera;
+			}
+
+			tmpPoint.set(x, y);
+			drawTextInner(renderCam, tmpPoint, text, size, color);
+		});
+	}
+
+	public function drawWorldText(?cam:FlxCamera, x:Float, y:Float, text:String, size:Int = 10, layer:Dynamic = null, color:Int = 0xFF00FF) {
+		if (layer == null) {
+			layer = defaultLayer;
+		}
+
+		if (!enabled || !layer_enabled[layer]) {
+			return;
+		}
+
+		calls.push(() -> {
+			var renderCam = cam;
+
+			if (renderCam == null) {
+				renderCam = FlxG.camera;
+			}
+
+			tmpPoint.set(x, y).subtract(renderCam.scroll.x, renderCam.scroll.y);
+			drawTextInner(renderCam, tmpPoint, text, size, color);
+		});
+	}
+
+	public function drawTextInner(renderCam:FlxCamera, p:FlxPoint, text:String, size:Int = 10, layer:Dynamic = null, color:Int = 0xFF00FF) {
+		var textField = new TextField();
+
+		if (textFormat == null) {
+			textFormat = new TextFormat(size, 0xFFFFFF);
+		}
+
+		textField.text = text;
+		textField.embedFonts = true;
+		textFormat.size = size;
+
+		// Set textFormat _after_ setting the text into the field to avoid weird defaults getting set
+		// due to an empty string
+		textField.setTextFormat(textFormat);
+		textField.textColor = color;
+
+		var bitmapData = new BitmapData(Std.int(textField.width), Std.int(textField.height), true, 0x00000000);
+		bitmapData.draw(textField);
+
+		var gfx = renderCam.debugLayer.graphics;
+		gfx.lineStyle();
+		gfx.beginBitmapFill(bitmapData);
+		gfx.drawRect(p.x, p.y, bitmapData.width, bitmapData.height);
+		gfx.endFill();
+	}
+
 	private function drawRectInner(renderCam:FlxCamera, rect:FlxRect, color:Int) {
 		renderCam.getViewMarginRect(tmpRect2);
 		if (!tmpRect.overlaps(tmpRect2)) {
@@ -329,16 +405,19 @@ class DebugDraw extends FlxBasic {
 	}
 	#else
 	// all no-ops when not in debug. Inline to save function call if compiler doesn't optimize it out
+	public inline function setDrawFont(name:String, size:Int) {}
+	
 	public inline function drawWorldRect(?cam:FlxCamera, x:Float, y:Float, width:Float, height:Float, layer:Dynamic = null, color:Int = 0xFF00FF) {}
-
 	public inline function drawCameraRect(?cam:FlxCamera, x:Float, y:Float, width:Float, height:Float, layer:Dynamic = null, color:Int = 0xFF00FF) {}
 
 	public inline function drawWorldLine(?cam:FlxCamera, startX:Float, startY:Float, endX:Float, endY:Float, layer:Dynamic = null, color:Int = 0xFF00FF) {}
-
 	public inline function drawCameraLine(?cam:FlxCamera, startX:Float, startY:Float, endX:Float, endY:Float, layer:Dynamic = null, color:Int = 0xFF00FF) {}
 
 	public inline function drawWorldCircle(?cam:FlxCamera, x:Float, y:Float, radius:Float, layer:Dynamic = null, color:Int = 0xFF00FF) {}
-
 	public inline function drawCameraCircle(?cam:FlxCamera, x:Float, y:Float, radius:Float, layer:Dynamic = null, color:Int = 0xFF00FF) {}
+	
+	public inline function drawWorldText(?cam:FlxCamera, x:Float, y:Float, text:String, size:Int = 10, layer:Dynamic = null, color:Int = 0xFF00FF) {}
+	public inline function drawCameraText(?cam:FlxCamera, x:Float, y:Float, text:String, size:Int = 10, layer:Dynamic = null, color:Int = 0xFF00FF) {}
+	
 	#end
 }
