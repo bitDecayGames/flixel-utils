@@ -1,5 +1,7 @@
 package bitdecay.flixel.debug;
 
+import openfl.text.TextFormat;
+import openfl.text.TextField;
 import openfl.display.BitmapData;
 import openfl.display.Graphics;
 
@@ -112,6 +114,12 @@ class DebugDraw extends FlxBasic {
 
 	private var tmpRect = FlxRect.get();
 	private var tmpRect2 = FlxRect.get();
+
+	private var textFormat:TextFormat = null;
+
+	public function setDrawFont(name:String, size:Int) {
+		textFormat = new TextFormat(name, size, 0xFFFFFF);
+	}
 
 	public function drawWorldRect(?cam:FlxCamera, x:Float, y:Float, width:Float, height:Float, layer:Dynamic = null, color:Int = 0xFF00FF) {
 		if (layer == null) {
@@ -237,6 +245,52 @@ class DebugDraw extends FlxBasic {
 			tmpPoint.set(x, y);
 			drawCircleInner(renderCam, tmpPoint, radius, color);
 		});
+	}
+
+	public function drawCameraText(?cam:FlxCamera, x:Float, y:Float, text:String, size:Int = 10, layer:Dynamic = null, color:Int = 0xFF00FF) {
+		if (layer == null) {
+			layer = defaultLayer;
+		}
+
+		if (!enabled || !layer_enabled[layer]) {
+			return;
+		}
+
+		calls.push(() -> {
+			var renderCam = cam;
+
+			if (renderCam == null) {
+				renderCam = FlxG.camera;
+			}
+
+			tmpPoint.set(x, y);
+			drawTextInner(renderCam, tmpPoint, text, size, color);
+		});
+	}
+
+	public function drawTextInner(renderCam:FlxCamera, p:FlxPoint, text:String, size:Int = 10, layer:Dynamic = null, color:Int = 0xFF00FF) {
+		var textField = new TextField();
+
+		textField.text = text;
+		// textField.width = 200;
+		// textField.height = 50;
+
+		// Set textFormat _after_ setting the text into the field
+		if (textFormat != null) {
+			textFormat.size = size;
+			textField.setTextFormat(textFormat);
+		}
+
+		textField.textColor = color;
+
+		var bitmapData = new BitmapData(Std.int(textField.width), Std.int(textField.height), true, 0x00000000);
+		bitmapData.draw(textField);
+
+		var gfx = renderCam.debugLayer.graphics;
+		gfx.lineStyle();
+		gfx.beginBitmapFill(bitmapData);
+		gfx.drawRect(p.x, p.y, bitmapData.width, bitmapData.height);
+		gfx.endFill();
 	}
 
 	private function drawRectInner(renderCam:FlxCamera, rect:FlxRect, color:Int) {
