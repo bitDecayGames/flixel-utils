@@ -302,6 +302,7 @@ class DebugDraw extends FlxBasic {
 		textField.text = text;
 		textField.embedFonts = true;
 		textFormat.size = size;
+		textFormat.color = color;
 
 		// Set textFormat _after_ setting the text into the field to avoid weird defaults getting set
 		// due to an empty string
