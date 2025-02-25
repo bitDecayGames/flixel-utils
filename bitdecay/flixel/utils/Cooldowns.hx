@@ -1,8 +1,10 @@
 package bitdecay.flixel.utils;
 
+import flixel.FlxG;
 import flixel.util.FlxDestroyUtil.IFlxDestroyable;
 import flixel.util.FlxPool;
 
+// A class to manage cooldowns. Don't forget to call the update() function on this
 class Cooldowns {
 	var pool:FlxPool<Cd>;
 	var cds:Map<String, Cd>;
@@ -17,6 +19,7 @@ class Cooldowns {
 	public function set(key:String, time:Float) {
 		var cd = pool.get();
 		cd.set(key, time);
+		cds.set(key, cd);
 	}
 
 	// Returns true if the cooldown key exists and is active
