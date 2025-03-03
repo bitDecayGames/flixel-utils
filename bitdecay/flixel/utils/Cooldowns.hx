@@ -10,7 +10,7 @@ class Cooldowns {
 
 	public function new(?size:Int) {
 		cds = new Map<String, Cd>();
-		pool = new FlxPool<Cd>(Cd);
+		pool = new FlxPool<Cd>(Cd.new);
 		pool.preAllocate(size != null ? size : 0);
 	}
 
