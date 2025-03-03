@@ -1,6 +1,5 @@
 package bitdecay.flixel.utils;
 
-import flixel.FlxG;
 import flixel.util.FlxDestroyUtil.IFlxDestroyable;
 import flixel.util.FlxPool;
 
@@ -16,9 +15,9 @@ class Cooldowns {
 	}
 
 	// Sets a new cooldown, overwriting existing cooldown one if it exists
-	public function set(key:String, time:Float) {
+	public function set(key:String, time:Float, ?cb:()->Void) {
 		var cd = pool.get();
-		cd.set(key, time);
+		cd.set(key, time, cb);
 		cds.set(key, cd);
 	}
 
@@ -91,10 +90,11 @@ private class Cd implements IFlxDestroyable {
 
 	public function new() {}
 
-	public function set(key:String, time:Float) {
+	public function set(key:String, time:Float, ?cb:()->Void) {
 		this.key = key;
 		initial = time;
 		remaining = time;
+		onComplete = cb;
 	}
 
 	public function destroy() {
