@@ -61,15 +61,15 @@ enum abstract Cardinal(Int) from Int to Int {
 		var facing = 0;
 		switch (this) {
 			case NW | N | NE:
-				facing |= FlxDirectionFlags.UP;
+				facing |= FlxDirectionFlags.UP.toInt();
 			case SW | S | SE:
-				facing |= FlxDirectionFlags.DOWN;
+				facing |= FlxDirectionFlags.DOWN.toInt();
 		}
 		switch (this) {
 			case NE | E | SE:
-				facing |= FlxDirectionFlags.RIGHT;
+				facing |= FlxDirectionFlags.RIGHT.toInt();
 			case NW | W | SW:
-				facing |= FlxDirectionFlags.LEFT;
+				facing |= FlxDirectionFlags.LEFT.toInt();
 		}
 		return facing;
 	}
@@ -78,40 +78,40 @@ enum abstract Cardinal(Int) from Int to Int {
 	 * Converts the given Flixel facing integer to a Cardinal
 	**/
 	public static function fromFacing(facing:Int):Cardinal {
-		if (facing & FlxDirectionFlags.UP != 0) {
-			if (facing & FlxDirectionFlags.LEFT != 0) {
+		if (facing & FlxDirectionFlags.UP.toInt() != 0) {
+			if (facing & FlxDirectionFlags.LEFT.toInt() != 0) {
 				return NW;
-			} else if (facing & FlxDirectionFlags.RIGHT != 0) {
+			} else if (facing & FlxDirectionFlags.RIGHT.toInt() != 0) {
 				return NE;
 			} else {
 				return N;
 			}
 		}
 
-		if (facing & FlxDirectionFlags.DOWN != 0) {
-			if (facing & FlxDirectionFlags.LEFT != 0) {
+		if (facing & FlxDirectionFlags.DOWN.toInt() != 0) {
+			if (facing & FlxDirectionFlags.LEFT.toInt() != 0) {
 				return SW;
-			} else if (facing & FlxDirectionFlags.RIGHT != 0) {
+			} else if (facing & FlxDirectionFlags.RIGHT.toInt() != 0) {
 				return SE;
 			} else {
 				return S;
 			}
 		}
 
-		if (facing & FlxDirectionFlags.LEFT != 0) {
-			if (facing & FlxDirectionFlags.UP != 0) {
+		if (facing & FlxDirectionFlags.LEFT.toInt() != 0) {
+			if (facing & FlxDirectionFlags.UP.toInt() != 0) {
 				return NW;
-			} else if (facing & FlxDirectionFlags.DOWN != 0) {
+			} else if (facing & FlxDirectionFlags.DOWN.toInt() != 0) {
 				return SW;
 			} else {
 				return W;
 			}
 		}
 
-		if (facing & FlxDirectionFlags.RIGHT != 0) {
-			if (facing & FlxDirectionFlags.UP != 0) {
+		if (facing & FlxDirectionFlags.RIGHT.toInt() != 0) {
+			if (facing & FlxDirectionFlags.UP.toInt() != 0) {
 				return NE;
-			} else if (facing & FlxDirectionFlags.DOWN != 0) {
+			} else if (facing & FlxDirectionFlags.DOWN.toInt() != 0) {
 				return SE;
 			} else {
 				return E;
