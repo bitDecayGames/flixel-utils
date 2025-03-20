@@ -18,6 +18,46 @@ class Cooldowns {
 	public function set(key:String, time:Float, ?cb:()->Void) {
 		var cd = pool.get();
 		cd.set(key, time, cb);
+
+		if (cds.exists(key)) {
+			pool.put(cds.get(key));
+		}
+
+		cds.set(key, cd);
+	}
+
+	// Resets an existing cooldown with a new time if it exists, creating a new cd otherwise.
+	// This will preserve existing cb if a new one is not passed in
+	public function reset(key:String, time:Float, overwrite:OverwriteStyle=ALWAYS, ?cb:()->Void) {
+		var cd = cds.get(key);
+		if (cd == null) {
+			cd = pool.get();
+		}
+
+		var overwritten = false;
+		time = switch(overwrite) {
+			case ALWAYS:
+				overwritten = true;
+				time;
+			case IF_GREATER:
+				if (time > cd.remaining) {
+					overwritten = true;
+					time;
+				} else {
+					cd.remaining;
+				}
+			case IF_LESS:
+				if (time < cd.remaining) {
+					overwritten = true;
+					time;
+				} else {
+					cd.remaining;
+				}
+		}
+
+		cd.set(key, overwritten ? time : cd.initial, cd.onComplete ?? cb);
+		cd.remaining = time;
+
 		cds.set(key, cd);
 	}
 
@@ -103,4 +143,10 @@ private class Cd implements IFlxDestroyable {
 		remaining = 0;
 		onComplete = null;
 	}
+}
+
+enum OverwriteStyle {
+	ALWAYS;
+	IF_GREATER;
+	IF_LESS;
 }
