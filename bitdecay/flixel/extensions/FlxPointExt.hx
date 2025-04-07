@@ -10,10 +10,15 @@ class FlxPointExt {
 	 *  @param point	center point
 	 *  @param angle	angle from center in degrees
 	 *  @param radius	radius/distance from center
+	 *  @param p        a point to use for the result, if provided
 	 *  @return			FlxPoint
 	 */
-	public static inline function pointOnCircumference(point:FlxPoint, angle:Float, radius:Float):FlxPoint {
-		return FlxPoint.get(point.x + radius * Math.cos(angle * FlxAngle.TO_RAD), point.y + radius * Math.sin(angle * FlxAngle.TO_RAD));
+	public static inline function pointOnCircumference(point:FlxPoint, angle:Float, radius:Float, ?p:FlxPoint):FlxPoint {
+		if (p == null) {
+			p = FlxPoint.get();
+		}
+		p.set(point.x + radius * Math.cos(angle * FlxAngle.TO_RAD), point.y + radius * Math.sin(angle * FlxAngle.TO_RAD));
+		return p;
 	}
 
 	/**
