@@ -1,10 +1,18 @@
 package bitdecay.flixel.debug.tools.btree;
 
 #if FLX_DEBUG
-import flixel.util.FlxSignal.FlxTypedSignal;
-import flixel.system.debug.DebuggerUtil;
 import flixel.FlxG;
+import flixel.math.FlxMath;
+import flixel.math.FlxPoint;
+import flixel.system.debug.DebuggerUtil;
+import flixel.system.debug.FlxDebugger.GraphicArrowLeft;
+import flixel.system.debug.FlxDebugger.GraphicArrowRight;
 import flixel.system.debug.Window;
+import flixel.system.ui.FlxSystemButton;
+import flixel.util.FlxColor;
+import flixel.util.FlxDestroyUtil;
+import flixel.util.FlxSignal.FlxTypedSignal;
+import flixel.util.FlxSpriteUtil;
 import openfl.display.Bitmap;
 import openfl.display.BitmapData;
 import openfl.display.Graphics;
@@ -13,17 +21,6 @@ import openfl.display.Sprite;
 import openfl.events.MouseEvent;
 import openfl.geom.Matrix;
 import openfl.text.TextField;
-import flixel.math.FlxMath;
-import flixel.math.FlxPoint;
-import flixel.system.ui.FlxSystemButton;
-import flixel.util.FlxColor;
-import flixel.util.FlxDestroyUtil;
-import flixel.util.FlxSpriteUtil;
-import flixel.util.FlxStringUtil;
-import flixel.system.debug.FlxDebugger.GraphicArrowLeft;
-import flixel.system.debug.FlxDebugger.GraphicArrowRight;
-import flixel.system.debug.FlxDebugger.GraphicBitmapLog;
-
 using flixel.util.FlxBitmapDataUtil;
 
 /**
@@ -314,8 +311,7 @@ class BTreeInspectorWindow extends DebugToolWindow {
 		_counterText.text = '${_curIndex + 1}/${_entries.length}';
 
 		var entryName:String = _curEntry != null ? _curEntry.name : "";
-		var name:String = (entryName == "") ? "" : '"$entryName" | ';
-		_dimensionsText.text = _curEntry.name;
+		_dimensionsText.text = entryName;
 
 		_footerText.text = footerText;
 

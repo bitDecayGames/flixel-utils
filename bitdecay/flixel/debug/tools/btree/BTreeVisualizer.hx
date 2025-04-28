@@ -1,5 +1,6 @@
 package bitdecay.flixel.debug.tools.btree;
 
+#if debug
 import bitdecay.behavior.tree.BTExecutor;
 import bitdecay.behavior.tree.Node;
 import bitdecay.behavior.tree.NodeStatus;
@@ -7,7 +8,6 @@ import bitdecay.behavior.tree.composite.*;
 import bitdecay.behavior.tree.decorator.*;
 import bitdecay.behavior.tree.leaf.*;
 import flixel.FlxBasic;
-import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.math.FlxAngle;
 import flixel.math.FlxMatrix;
@@ -18,9 +18,10 @@ import openfl.display.BlendMode;
 import openfl.display.Shape;
 
 class BTreeVisualizer extends FlxBasic {
-	var tree:BTExecutor;
+	var exec:BTExecutor;
 
 	public var dirty:Bool = false;
+	public var focusNode:Node = null;
 	public var treeGraph:BitmapData;
 	public var activationImage:BitmapData;
 	public var composite:BitmapData;
@@ -64,6 +65,7 @@ class BTreeVisualizer extends FlxBasic {
 		Type.getClassName(Failer) => 18,
 	];
 
+	var focusColor = FlxColor.MAGENTA;
 	var statusColorMap:Map<NodeStatus, FlxColor> = [
 		RUNNING => FlxColor.YELLOW,
 		SUCCESS => FlxColor.BLUE.getDarkened(.5),
@@ -71,16 +73,16 @@ class BTreeVisualizer extends FlxBasic {
 		UNKNOWN => FlxColor.BLACK
 	];
 
-	public function new(tree:BTExecutor) {
+	public function new(exec:BTExecutor) {
 		super();
-		this.tree = tree;
+		this.exec = exec;
 
 		iconStamp = new FlxSprite();
 		@:privateAccess
 		iconStamp.loadGraphic(BTreeInspector.nodeIconBitmap, true, 16, 16);
 
-		tree.addChangeListener(drawActivationLine);
-		tree.addPostProcessListener(() -> {
+		exec.addChangeListener(drawActivationLine);
+		exec.addPostProcessListener(() -> {
 			if (redraws > 0) {
 				// only go through the bother of drawing our lines and clearing the graphics
 				// if we actually have something to draw
@@ -147,6 +149,10 @@ class BTreeVisualizer extends FlxBasic {
 		}
 
 		// gfx.drawRoundRect(cRect.left-1, cRect.top-1, cRect.width+2, cRect.height+2, cRect.width / 2, cRect.height / 2);
+		if (child == focusNode) {
+			gfx.lineStyle(2, focusColor);
+		}
+		
 		gfx.drawRect(cRect.left - 1, cRect.top - 1, cRect.width + 2, cRect.height + 2);
 	}
 
@@ -197,7 +203,8 @@ class BTreeVisualizer extends FlxBasic {
 
 	public function build() {
 		@:privateAccess
-		exploreNode(tree.root, 0, 0);
+		exploreNode(exec.root, 0, 0);
 		buildTreeGraphic();
 	}
 }
+#end

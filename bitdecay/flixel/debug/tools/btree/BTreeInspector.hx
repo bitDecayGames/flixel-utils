@@ -1,14 +1,14 @@
 package bitdecay.flixel.debug.tools.btree;
 
+import flixel.util.FlxColor;
+#if debug
+import bitdecay.behavior.tree.BTExecutor;
 import bitdecay.behavior.tree.Node;
+import bitdecay.flixel.debug.DebugTool.BaseToolData;
 import flixel.FlxG;
-import haxe.io.Bytes;
+import openfl.display.BitmapData;
 import openfl.display.Loader;
 import openfl.events.Event;
-#if FLX_DEBUG
-import bitdecay.behavior.tree.BTExecutor;
-import bitdecay.flixel.debug.DebugTool.BaseToolData;
-import openfl.display.BitmapData;
 using flixel.util.FlxBitmapDataUtil;
 
 /**
@@ -89,6 +89,8 @@ class BTreeInspector extends DebugTool<BTreeInspectorWindow> {
 			trace(Type.getClassName(Type.getClass(focusNode)));
 			@:privateAccess
 			window.setInfoText([Type.getClassName(Type.getClass(focusNode))].concat(focusNode.getDetail()).join("\n"));
+		} else {
+			window.setInfoText("");
 		}
 
 		@:privateAccess {
@@ -110,7 +112,19 @@ class BTreeInspector extends DebugTool<BTreeInspectorWindow> {
 
 	function handleClick(name:String, x:Int, y:Int) {
 		var vis = trees.get(name);
-		focusNode = vis.nodeAtPoint(x, y);
+		var newFocus = vis.nodeAtPoint(x, y);
+		vis.focusNode = newFocus;
+
+		if (focusNode != null) {
+			@:privateAccess
+		vis.drawLineBetweenNodes(null, focusNode, FlxColor.TRANSPARENT);
+		}
+		if (newFocus != null) {
+			@:privateAccess
+			vis.drawLineBetweenNodes(null, newFocus, FlxColor.TRANSPARENT);
+		}
+		
+		focusNode = newFocus;
 	}
 
 	override function makeWindow(icon:BitmapData):BTreeInspectorWindow {
