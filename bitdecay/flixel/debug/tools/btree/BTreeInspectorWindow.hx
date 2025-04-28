@@ -30,6 +30,7 @@ class BTreeInspectorWindow extends DebugToolWindow {
 	static inline var FOOTER_HEIGHT = 48;
 
 	public var zoom(default, set):Float = 1;
+	var requestedZoom:Float = 1;
 
 	var _zoomCenter:FlxPoint = FlxPoint.get();
 
@@ -41,7 +42,7 @@ class BTreeInspectorWindow extends DebugToolWindow {
 	var _curBitmap(get, never):BitmapData;
 	var _point:FlxPoint = FlxPoint.get();
 	var _lastMousePos:FlxPoint = FlxPoint.get();
-	var _curMouseOffset:FlxPoint = FlxPoint.get();
+	var _curRenderOffsetRaw:FlxPoint = FlxPoint.get();
 	var _matrix:Matrix = new Matrix();
 	var _buttonLeft:FlxSystemButton;
 	var _buttonText:FlxSystemButton;
@@ -154,7 +155,7 @@ class BTreeInspectorWindow extends DebugToolWindow {
 	override public function update():Void {
 		if (_middleMouseDown) {
 			var delta = FlxPoint.get(mouseX, mouseY);
-			_curMouseOffset.add(delta.subtract(_lastMousePos));
+			_curRenderOffsetRaw.add(delta.subtract(_lastMousePos));
 			refreshCanvas();
 			_lastMousePos.set(mouseX, mouseY);
 		}
@@ -215,7 +216,8 @@ class BTreeInspectorWindow extends DebugToolWindow {
 
 	inline function resetSettings():Void {
 		zoom = Math.min(_canvas.height / _curEntry.bitmap.height, _canvas.width / _curEntry.bitmap.width);
-		_curMouseOffset.set();
+		requestedZoom = zoom;
+		_curRenderOffsetRaw.set();
 	}
 
 	/**
@@ -282,13 +284,25 @@ class BTreeInspectorWindow extends DebugToolWindow {
 
 		_curIndex = Index;
 
-		setCanvasTopLeft();
+		setRenderTopLeft();
 
 		_matrix.identity();
-		// _matrix.translate(-_zoomCenter.x, -_zoomCenter.y);
 		_matrix.scale(zoom, zoom);
-		// _matrix.translate(_zoomCenter.x, _zoomCenter.y);
-		_matrix.translate(_point.x, _point.y);
+		if (requestedZoom != zoom) {
+			// get vector from mouse to top-left of graphic
+			var offsetMath = FlxPoint.get().copyFrom(_curRenderOffsetRaw).subtract(_zoomCenter);
+			// invert zoom to find raw length of vector
+			offsetMath.scale(1/zoom);
+			// apply new zoom to get length of vector at new zoom scale
+			offsetMath.scale(requestedZoom);
+			// add our mouse position back in
+			offsetMath.add(_zoomCenter);
+			// save our new offset
+			_curRenderOffsetRaw.copyFrom(offsetMath);
+			offsetMath.put();
+			zoom = requestedZoom;
+		}
+		_matrix.translate(_curRenderOffsetRaw.x, _curRenderOffsetRaw.y);
 
 		drawBoundingBox(_curBitmap);
 		_canvas.draw(_curBitmap, _matrix, null, null, _canvas.rect, false);
@@ -300,11 +314,8 @@ class BTreeInspectorWindow extends DebugToolWindow {
 		return true;
 	}
 
-	function setCanvasTopLeft() {
-		_point.x = (_canvas.width / 2) - (_curBitmap.width * zoom / 2);
-		_point.y = (_canvas.height / 2) - (_curBitmap.height * zoom / 2);
-
-		_point.add(_curMouseOffset);
+	function setRenderTopLeft() {
+		_point.copyFrom(_curRenderOffsetRaw);
 	}
 
 	function refreshTexts():Void {
@@ -335,7 +346,7 @@ class BTreeInspectorWindow extends DebugToolWindow {
 		super.onMouseDown(_);
 
 		// This sets _point to the top left corner of the image in window coordinates
-		setCanvasTopLeft();
+		setRenderTopLeft();
 		_point.subtract(mouseX, mouseY - _header.height);
 		// this adjusts for zoom and flips the XY so that they are in the positive direction
 		_point.scale(-1 / zoom);
@@ -344,10 +355,8 @@ class BTreeInspectorWindow extends DebugToolWindow {
 	}
 
 	function onMouseWheel(e:MouseEvent):Void {
-		zoom += FlxMath.signOf(e.delta) * 0.25 * zoom;
-
-		// sets our zoom center. Feels like this needs to take zoom into account
-		_zoomCenter.copyFrom(_point).subtract(mouseX, mouseY - _header.height);
+		requestedZoom = zoom + FlxMath.signOf(e.delta) * 0.25 * zoom;
+		_zoomCenter.set(mouseX, mouseY - _header.height);
 		refreshCanvas();
 	}
 
