@@ -51,6 +51,7 @@ class BTreeVisualizer extends FlxBasic {
 		Type.getClassName(Wait) => 12,
 		Type.getClassName(SetVariable) => 3,
 		Type.getClassName(IsVarNull) => 13,
+		Type.getClassName(RemoveVariable) => 23,
 		Type.getClassName(Action) => 4,
 		Type.getClassName(StatusAction) => 14,
 		Type.getClassName(Subtree) => 5,
