@@ -1,10 +1,4 @@
-package bitdecay.flixel.debug;
-
-import openfl.geom.Matrix;
-import openfl.text.TextFormat;
-import openfl.text.TextField;
-import openfl.display.BitmapData;
-import openfl.display.Graphics;
+package bitdecay.flixel.debug.tools.draw;
 
 import flixel.FlxBasic;
 import flixel.FlxCamera;
@@ -13,9 +7,14 @@ import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
 import flixel.system.ui.FlxSystemButton;
 import flixel.util.FlxColor;
+import openfl.display.BitmapData;
+import openfl.display.Graphics;
+import openfl.geom.Matrix;
+import openfl.text.TextField;
+import openfl.text.TextFormat;
 
 #if FLX_DEBUG
-import bitdecay.flixel.debug.DebuggerWindow;
+import bitdecay.flixel.debug.tools.draw.DebugDrawWindow;
 #end
 
 class DebugDraw extends FlxBasic {
@@ -44,7 +43,7 @@ class DebugDraw extends FlxBasic {
 	private static var defaultLayer = "";
 
 	static var draw_debug_button:FlxSystemButton;
-	static var debug_window:DebuggerWindow;
+	static var debug_window:DebugDrawWindow;
 
 	private static var registeredConsole = false;
 	#end
@@ -94,7 +93,7 @@ class DebugDraw extends FlxBasic {
 				}
 			}
 
-			debug_window = new DebuggerWindow(icon);
+			debug_window = new DebugDrawWindow(icon);
 			FlxG.game.debugger.addWindow(debug_window);
 
 			draw_debug_button = FlxG.debugger.addButton(RIGHT, icon, () -> enabled = !enabled, true, true);

@@ -1,19 +1,19 @@
-package bitdecay.flixel.debug;
+package bitdecay.flixel.debug.tools.draw;
 
 #if FLX_DEBUG
+import bitdecay.flixel.debug.tools.draw.DebugDraw;
 import flixel.FlxG;
-import openfl.display.BitmapData;
-import bitdecay.flixel.debug.DebugDraw;
-import openfl.events.MouseEvent;
-import openfl.text.TextField;
-import flixel.util.FlxColor;
 import flixel.system.debug.DebuggerUtil;
 import flixel.system.debug.Window;
+import flixel.util.FlxColor;
+import openfl.display.BitmapData;
+import openfl.events.MouseEvent;
+import openfl.text.TextField;
 
 /**
  * A simple window that provides toggle buttons for each custom debug draw layers
 **/
-class DebuggerWindow extends Window {
+class DebugDrawWindow extends Window {
 	/**
 	 * How often to update the stats, in ms. The lower, the more performance-intense!
 	 */
