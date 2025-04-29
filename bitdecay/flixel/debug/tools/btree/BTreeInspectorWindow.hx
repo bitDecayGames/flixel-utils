@@ -1,6 +1,7 @@
 package bitdecay.flixel.debug.tools.btree;
 
 #if FLX_DEBUG
+import bitdecay.behavior.Tools;
 import bitdecay.behavior.tree.context.BTContext;
 import haxe.ds.ArraySort;import flixel.FlxG;
 import flixel.math.FlxMath;
@@ -376,10 +377,27 @@ class BTreeInspectorWindow extends DebugToolWindow {
 
 			var displayText:Array<String> = [];
 			for (k in rawKeys) {
-				displayText.push('${k}: ${ctx.contents.get(k)}'.substr(0, 20));
+				displayText.push('${k}: ${format(ctx.get(k))}');
 			};
 
 			_ctxText.text = displayText.join("\n");
+		}
+	}
+
+	function format(v:Dynamic):String {
+		if (Std.isOfType(v, Array)) {
+			var arr:Array<Dynamic> = cast v;
+			return 'Array[' + arr.length + ']';
+		}
+
+		switch Type.typeof(v) {
+			case TFloat:
+				return Std.string(FlxMath.roundDecimal(cast v, 3));
+			case TClass(c):
+				// For instances, get the class name only
+				return Type.getClassName(Type.getClass(v));
+			default:
+				return Std.string(v);
 		}
 	}
 
