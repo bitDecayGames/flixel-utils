@@ -1,11 +1,21 @@
 package bitdecay.flixel.debug;
 
-import flixel.util.FlxSignal.FlxTypedSignal;
 import flixel.system.debug.Window;
+import flixel.util.FlxSignal.FlxTypedSignal;
+import flixel.util.FlxSignal;
 
 class DebugToolWindow extends Window {
 	public var onResize = new FlxTypedSignal<(Int, Int) -> Void>();
 	public var onReposition = new FlxTypedSignal<(Int, Int) -> Void>();
+	public var onUpdate = new FlxSignal();
+	public var dirty = false;
+
+	// This is not ideal as the window should be updating the underlying tool... but that's how I built it
+	// before I realized the windows are automatically updated by flixel when the game is paused
+	override function update() {
+		super.update();
+		onUpdate.dispatch();
+	}
 
 	override function updateSize():Void {
 		super.updateSize();

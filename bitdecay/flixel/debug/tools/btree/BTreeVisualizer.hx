@@ -1,5 +1,6 @@
 package bitdecay.flixel.debug.tools.btree;
 
+import openfl.geom.Rectangle;
 #if debug
 import bitdecay.behavior.tree.BTExecutor;
 import bitdecay.behavior.tree.Node;
@@ -82,19 +83,31 @@ class BTreeVisualizer extends FlxBasic {
 		iconStamp.loadGraphic(BTreeInspector.nodeIconBitmap, true, 16, 16);
 
 		exec.addChangeListener(drawActivationLine);
-		exec.addPostProcessListener(() -> {
-			if (redraws > 0) {
-				// only go through the bother of drawing our lines and clearing the graphics
-				// if we actually have something to draw
-				redraws = 0;
+	}
+
+	function flushPendingDraws() {
+		if (redraws > 0) {
+			// only go through the bother of drawing our lines and clearing the graphics
+			// if we actually have something to draw
+			redraws = 0;
+			activationImage.draw(shapeDrawer);
+			shapeDrawer.graphics.clear();
+
+			composite.fillRect(new Rectangle(0, 0, composite.width, composite.height), FlxColor.TRANSPARENT);
+			composite.draw(treeGraph);
+			composite.draw(activationImage);
+
+			if (focusNode != null) {
+				var cRect = ownerMap.get(focusNode);
+				shapeDrawer.graphics.beginFill(FlxColor.MAGENTA, 0.5);
+				shapeDrawer.graphics.drawRect(cRect.left, cRect.top, cRect.width, cRect.height);
 				composite.draw(shapeDrawer);
 				shapeDrawer.graphics.clear();
 			}
-		});
+		}
 	}
 
 	function drawActivationLine(parent:Node, child:Node, status:NodeStatus) {
-		redraws++;
 		drawLineBetweenNodes(parent, child, statusColorMap.get(status));
 		dirty = true;
 	}
@@ -110,6 +123,8 @@ class BTreeVisualizer extends FlxBasic {
 
 	override function update(elapsed:Float) {
 		super.update(elapsed);
+
+		flushPendingDraws();
 	}
 
 	public function nodeAtPoint(x:Int, y:Int):Node {
@@ -147,13 +162,10 @@ class BTreeVisualizer extends FlxBasic {
 			gfx.lineTo(pRect.right + spacing / 2, cRect.top + cRect.height / 2);
 			gfx.lineTo(cRect.left - 1, cRect.top + cRect.height / 2);
 		}
-
-		// gfx.drawRoundRect(cRect.left-1, cRect.top-1, cRect.width+2, cRect.height+2, cRect.width / 2, cRect.height / 2);
-		if (child == focusNode) {
-			gfx.lineStyle(2, focusColor);
-		}
 		
 		gfx.drawRect(cRect.left - 1, cRect.top - 1, cRect.width + 2, cRect.height + 2);
+		redraws++;
+		dirty = true;
 	}
 
 	function buildTreeGraphic() {

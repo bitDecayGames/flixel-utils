@@ -10,7 +10,7 @@ import flixel.util.FlxColor;
 import openfl.display.BitmapData;
 using flixel.util.FlxBitmapDataUtil;
 
-class DebugTool<T:DebugToolWindow> extends FlxBasic {
+class DebugTool<T:DebugToolWindow> {
 	var name:String;
 	var button:FlxSystemButton;
 	var window:T;
@@ -18,7 +18,6 @@ class DebugTool<T:DebugToolWindow> extends FlxBasic {
 	public var enabled(default, set) = true;
 
 	public function new(dataName:String, iconData:Array<Array<Float>>) {
-		super();
 		name = dataName;
 		var icon = iconFromData(iconData);
 		window = makeWindow(icon);
@@ -27,8 +26,13 @@ class DebugTool<T:DebugToolWindow> extends FlxBasic {
 		}
 		window.onResize.add(handleResize);
 		window.onReposition.add(handleReposition);
+		window.onUpdate.add(update);
 		FlxG.game.debugger.addWindow(window);
 		button = FlxG.debugger.addButton(RIGHT, icon, () -> enabled = !enabled, true, true);
+	}
+
+	public function update() {
+		
 	}
 
 	public function init() {

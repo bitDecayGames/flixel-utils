@@ -67,14 +67,9 @@ class BTreeInspector extends DebugTool<BTreeInspectorWindow> {
 		super.loadData();
 
 		window.resize(window.width, window.height);
-
-		// This probably isn't the right way to do this
-		FlxG.plugins.addPlugin(this);
 	}
 
-	override function update(elapsed:Float) {
-		super.update(elapsed);
-
+	override function update() {
 		if (nodeIconBitmap != null) {
 			for (name => btree in pendingAdds) {
 				var visualizer = new BTreeVisualizer(btree);
@@ -101,6 +96,7 @@ class BTreeInspector extends DebugTool<BTreeInspectorWindow> {
 						window.setContext(treeVis.exec.ctx);
 					}
 					if (treeVis.dirty) {
+						treeVis.flushPendingDraws();
 						treeVis.dirty = false;
 						window.refreshCanvas();
 						break;
@@ -120,16 +116,6 @@ class BTreeInspector extends DebugTool<BTreeInspectorWindow> {
 		var vis = trees.get(name);
 		var newFocus = vis.nodeAtPoint(x, y);
 		vis.focusNode = newFocus;
-
-		if (focusNode != null) {
-			@:privateAccess
-		vis.drawLineBetweenNodes(null, focusNode, FlxColor.TRANSPARENT);
-		}
-		if (newFocus != null) {
-			@:privateAccess
-			vis.drawLineBetweenNodes(null, newFocus, FlxColor.TRANSPARENT);
-		}
-		
 		focusNode = newFocus;
 	}
 

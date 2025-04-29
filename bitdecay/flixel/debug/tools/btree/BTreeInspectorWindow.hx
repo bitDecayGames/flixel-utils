@@ -110,7 +110,7 @@ class BTreeInspectorWindow extends DebugToolWindow {
 		// allow clicking on the text to reset the current settings
 		_buttonText = new FlxSystemButton(null, function() {
 			resetSettings();
-			refreshCanvas();
+			dirty = true;
 		});
 		_buttonText.addChild(_counterText);
 
@@ -167,11 +167,17 @@ class BTreeInspectorWindow extends DebugToolWindow {
 	}
 
 	override public function update():Void {
+		super.update();
 		if (_middleMouseDown) {
 			var delta = FlxPoint.get(mouseX, mouseY);
 			_curRenderOffsetRaw.add(delta.subtract(_lastMousePos));
-			refreshCanvas();
+			dirty = true;
 			_lastMousePos.set(mouseX, mouseY);
+		}
+
+		if (dirty) {
+			dirty = false;
+			refreshCanvas();
 		}
 	}
 
@@ -190,7 +196,7 @@ class BTreeInspectorWindow extends DebugToolWindow {
 		var newHeight = Std.int(Math.max(1, _height - _canvasBitmap.y - _footer.height));
 
 		_canvasBitmap.bitmapData = new BitmapData(newWidth, newHeight, true, FlxColor.TRANSPARENT);
-		refreshCanvas(_curIndex);
+		dirty = true;
 
 		_ui.x = _header.width - _ui.width - 5;
 
@@ -253,7 +259,8 @@ class BTreeInspectorWindow extends DebugToolWindow {
 		setVisible(true);
 		_entries.push({bitmap: bmp, name: name});
 		resetSettings();
-		return refreshCanvas();
+		dirty = true;
+		return true;
 	}
 
 	/**
@@ -271,7 +278,7 @@ class BTreeInspectorWindow extends DebugToolWindow {
 			_curIndex = _entries.length - 1;
 		}
 
-		refreshCanvas(_curIndex);
+		dirty = true;
 	}
 
 	public function clear():Void {
@@ -407,13 +414,16 @@ class BTreeInspectorWindow extends DebugToolWindow {
 		// this adjusts for zoom and flips the XY so that they are in the positive direction
 		_point.scale(-1 / zoom);
 
-		onClick.dispatch(_curEntry.name, cast _point.x, cast _point.y);
+		if (_curEntry != null) {
+			onClick.dispatch(_curEntry.name, cast _point.x, cast _point.y);
+		}
 	}
 
 	function onMouseWheel(e:MouseEvent):Void {
-		requestedZoom = zoom + FlxMath.signOf(e.delta) * 0.25 * zoom;
+		// some goofy math to make zoom ticks consistent. Down by 25% is the inverse of up by 33%
+		requestedZoom = zoom + FlxMath.signOf(e.delta) * (FlxMath.signOf(e.delta) > 0 ? (1/3) : 0.25) * zoom;
 		_zoomCenter.set(mouseX, mouseY - _header.height);
-		refreshCanvas();
+		dirty = true;
 	}
 
 	function onMiddleDown(e:MouseEvent):Void {
