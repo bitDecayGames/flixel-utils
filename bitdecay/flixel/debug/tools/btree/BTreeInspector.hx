@@ -95,10 +95,15 @@ class BTreeInspector extends DebugTool<BTreeInspectorWindow> {
 
 		@:privateAccess {
 			for (name => treeVis in trees) {
-				if (treeVis.dirty && window._curEntry.name == name) {
-					treeVis.dirty = false;
-					window.refreshCanvas();
-					break;
+				if (window._curEntry.name == name) {
+					if (treeVis.exec.ctx.dirty) {
+						window.setContext(treeVis.exec.ctx);
+					}
+					if (treeVis.dirty) {
+						treeVis.dirty = false;
+						window.refreshCanvas();
+						break;
+					}
 				}
 			}
 		}

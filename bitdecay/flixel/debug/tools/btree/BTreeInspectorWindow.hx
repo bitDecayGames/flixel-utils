@@ -1,7 +1,8 @@
 package bitdecay.flixel.debug.tools.btree;
 
 #if FLX_DEBUG
-import flixel.FlxG;
+import bitdecay.behavior.tree.context.BTContext;
+import haxe.ds.ArraySort;import flixel.FlxG;
 import flixel.math.FlxMath;
 import flixel.math.FlxPoint;
 import flixel.system.debug.DebuggerUtil;
@@ -28,6 +29,7 @@ using flixel.util.FlxBitmapDataUtil;
  */
 class BTreeInspectorWindow extends DebugToolWindow {
 	static inline var FOOTER_HEIGHT = 48;
+	static inline var CTX_WIDTH = 200;
 
 	public var zoom(default, set):Float = 1;
 	var requestedZoom:Float = 1;
@@ -53,6 +55,8 @@ class BTreeInspectorWindow extends DebugToolWindow {
 	var _middleMouseDown:Bool = false;
 	var _footer:Bitmap;
 	var _footerText:TextField;
+	var _ctxSidebar:Bitmap;
+	var _ctxText:TextField;
 
 	var footerText:String = "";
 
@@ -64,13 +68,14 @@ class BTreeInspectorWindow extends DebugToolWindow {
 		minSize.x = 165;
 		minSize.y = Window.HEADER_HEIGHT + FOOTER_HEIGHT + 1;
 
-		_canvasBitmap = new Bitmap(new BitmapData(Std.int(width), Std.int(height - Window.HEADER_HEIGHT - FOOTER_HEIGHT), true, FlxColor.TRANSPARENT));
+		_canvasBitmap = new Bitmap(new BitmapData(Std.int(width), Std.int(Math.max( 50, height - Window.HEADER_HEIGHT - FOOTER_HEIGHT)), true, FlxColor.TRANSPARENT));
 		_canvasBitmap.x = 0;
 		_canvasBitmap.y = Window.HEADER_HEIGHT;
 		addChild(_canvasBitmap);
 
 		createHeaderUI();
 		createFooterUI();
+		createContextUI();
 
 		setVisible(false);
 
@@ -129,6 +134,15 @@ class BTreeInspectorWindow extends DebugToolWindow {
 		addChild(_footerText);
 	}
 
+	function createContextUI():Void {
+		_ctxSidebar = new Bitmap(new BitmapData(CTX_WIDTH, 1, true, Window.HEADER_COLOR));
+		_ctxSidebar.alpha = Window.HEADER_ALPHA;
+		addChild(_ctxSidebar);
+
+		_ctxText = DebuggerUtil.createTextField();
+		addChild(_ctxText);
+	}
+
 	/**
 	 * Clean up memory.
 	 */
@@ -172,18 +186,20 @@ class BTreeInspectorWindow extends DebugToolWindow {
 
 		_canvasBitmap.bitmapData = FlxDestroyUtil.dispose(_canvas);
 
-		var newWidth = Std.int(_width - _canvasBitmap.x);
-		var newHeight = Std.int(_height - _canvasBitmap.y - _footer.height);
+		var newWidth = Std.int(Math.max(1, _width - _canvasBitmap.x - _ctxSidebar.width));
+		var newHeight = Std.int(Math.max(1, _height - _canvasBitmap.y - _footer.height));
 
-		if (newWidth > 0 && newHeight > 0) {
-			_canvasBitmap.bitmapData = new BitmapData(newWidth, newHeight, true, FlxColor.TRANSPARENT);
-			refreshCanvas(_curIndex);
-		}
+		_canvasBitmap.bitmapData = new BitmapData(newWidth, newHeight, true, FlxColor.TRANSPARENT);
+		refreshCanvas(_curIndex);
 
 		_ui.x = _header.width - _ui.width - 5;
 
 		_footer.width = _width;
 		_footer.y = _height - _footer.height;
+
+		_ctxSidebar.height = _height - _header.height - _footer.height;
+		_ctxSidebar.x = _width - _ctxSidebar.width;
+		_ctxSidebar.y = _header.height;
 
 		resizeTexts();
 	}
@@ -194,6 +210,9 @@ class BTreeInspectorWindow extends DebugToolWindow {
 
 		_footerText.y = _height - _footer.height;
 		_footerText.x = 0;
+
+		_ctxText.x = _width - _ctxSidebar.width;
+		_ctxText.y = _header.height;
 
 		_buttonText.x = 33 - _counterText.textWidth / 2;
 	}
@@ -214,8 +233,12 @@ class BTreeInspectorWindow extends DebugToolWindow {
 		refreshCanvas(_curIndex - 1);
 	}
 
-	inline function resetSettings():Void {
-		zoom = Math.min(_canvas.height / _curEntry.bitmap.height, _canvas.width / _curEntry.bitmap.width);
+	function resetSettings():Void {
+		if (_curEntry != null && _canvas != null) {
+			zoom = Math.min(_canvas.height / _curEntry.bitmap.height, _canvas.width / _curEntry.bitmap.width);
+		} else {
+			zoom = 1;
+		}
 		requestedZoom = zoom;
 		_curRenderOffsetRaw.set();
 	}
@@ -333,6 +356,39 @@ class BTreeInspectorWindow extends DebugToolWindow {
 		footerText = text;
 		refreshTexts();
 	}
+
+	public function setContext(ctx:BTContext) {
+		@:privateAccess {
+			var keyIter = ctx.contents.keys();
+			var rawKeys:Array<String> = [];
+			while (keyIter.hasNext()) {
+				rawKeys.push(keyIter.next());
+			}
+
+			ArraySort.sort(rawKeys, strSort);
+
+			var displayText:Array<String> = [];
+			for (k in rawKeys) {
+				displayText.push('${k}: ${ctx.contents.get(k)}'.substr(0, 20));
+			};
+
+			_ctxText.text = displayText.join("\n");
+		}
+	}
+
+	function strSort(a:String, b:String):Int {
+		a = a.toUpperCase();
+		b = b.toUpperCase();
+
+		if (a < b) {
+			return -1;
+		}
+		else if (a > b) {
+			return 1;
+		} else {
+			return 0;
+		}
+	};
 
 	function drawBoundingBox(bitmap:BitmapData):Void {
 		var gfx:Graphics = FlxSpriteUtil.flashGfx;

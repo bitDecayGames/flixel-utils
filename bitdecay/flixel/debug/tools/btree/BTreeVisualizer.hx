@@ -182,7 +182,7 @@ class BTreeVisualizer extends FlxBasic {
 			}
 			_matrix.translate(rect.x + iconStamp.origin.x, rect.y + iconStamp.origin.y);
 			var brushBlend:BlendMode = iconStamp.blend;
-			treeGraph.draw(iconStamp.framePixels, _matrix, null, brushBlend, null, iconStamp.antialiasing);
+			treeGraph.draw(iconStamp.framePixels, _matrix, null, brushBlend, null, true);
 		}
 
 		shapeDrawer.graphics.clear();
