@@ -97,6 +97,7 @@ class BTreeInspector extends DebugTool<BTreeInspectorWindow> {
 			for (name => treeVis in trees) {
 				if (window._curEntry.name == name) {
 					if (treeVis.exec.ctx.dirty) {
+						treeVis.exec.ctx.dirty = false;
 						window.setContext(treeVis.exec.ctx);
 					}
 					if (treeVis.dirty) {
