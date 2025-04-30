@@ -64,6 +64,7 @@ class BTreeVisualizer extends FlxBasic {
 		Type.getClassName(Succeeder) => 17,
 		Type.getClassName(Fail) => 8,
 		Type.getClassName(Failer) => 18,
+		Type.getClassName(Condition) => 9,
 	];
 
 	var focusColor = FlxColor.MAGENTA;

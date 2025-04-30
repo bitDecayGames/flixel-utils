@@ -81,7 +81,6 @@ class BTreeInspector extends DebugTool<BTreeInspectorWindow> {
 		}
 
 		if (focusNode != null) {
-			trace(Type.getClassName(Type.getClass(focusNode)));
 			@:privateAccess
 			window.setInfoText([Type.getClassName(Type.getClass(focusNode))].concat(focusNode.getDetail()).join("\n"));
 		} else {
