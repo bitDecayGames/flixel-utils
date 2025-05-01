@@ -52,7 +52,7 @@ class BTreeVisualizer extends FlxBasic {
 	var iconMap:Map<String, Int> = [
 		Type.getClassName(Repeater) => 0,
 		Type.getClassName(Parallel) => 10,
-		Type.getClassName(Selector) => 1,
+		Type.getClassName(Fallback) => 1,
 		Type.getClassName(Sequence) => 11,
 		Type.getClassName(TimeLimit) => 2,
 		Type.getClassName(Wait) => 12,
