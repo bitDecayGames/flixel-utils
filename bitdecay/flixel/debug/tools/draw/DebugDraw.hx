@@ -17,7 +17,7 @@ import openfl.text.TextFormat;
 import bitdecay.flixel.debug.tools.draw.DebugDrawWindow;
 #end
 
-class DebugDraw {
+class DebugDraw extends FlxBasic {
 	public static var ME(default, null):DebugDraw;
 
 	#if FLX_DEBUG
@@ -373,7 +373,7 @@ class DebugDraw {
 		return point;
 	}
 
-	override function update() {
+	override function update(delta:Float) {
 		calls = [];
 	}
 

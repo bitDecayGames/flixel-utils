@@ -1,6 +1,11 @@
 package bitdecay.flixel.debug.tools.btree;
 
+import flixel.math.FlxPoint;
+import flixel.system.FlxAssets;
+import openfl.geom.Matrix;
 import openfl.geom.Rectangle;
+import openfl.text.TextField;
+import openfl.text.TextFormat;
 #if debug
 import bitdecay.behavior.tree.BTExecutor;
 import bitdecay.behavior.tree.Node;
@@ -59,7 +64,7 @@ class BTreeVisualizer extends FlxBasic {
 		Type.getClassName(Subtree) => 5,
 		Type.getClassName(HierarchicalContext) => 15,
 		Type.getClassName(Inverter) => 6,
-		Type.getClassName(Interrupter) => 16,
+		// Type.getClassName(Interrupter) => 16,
 		Type.getClassName(Success) => 7,
 		Type.getClassName(Succeeder) => 17,
 		Type.getClassName(Fail) => 8,
@@ -113,13 +118,21 @@ class BTreeVisualizer extends FlxBasic {
 		dirty = true;
 	}
 
-	function makeNodeBox(n:Node, depth:Int, row:Int):FlxRect {
-		var box = FlxRect.get(depth * (iconStamp.width + spacing) + borderGap, row * (iconStamp.width + spacing) + borderGap, iconStamp.width, iconStamp.width);
+	// vertical offset persists to all further nodes
+	var extraVertOffset = 0.0;
+
+	// while extra horizontal on impacts children of this node directly
+	function makeNodeBox(n:Node, depth:Int, row:Int, extraHorizontal:Int):Int {
+		if (n.getName() != null && n.getName() != "") {
+			extraVertOffset += 25;
+			extraHorizontal += 10;
+		}
+		var box = FlxRect.get(depth * (iconStamp.width + spacing) + borderGap + extraHorizontal, row * (iconStamp.width + spacing) + borderGap + extraVertOffset, iconStamp.width, iconStamp.width);
 		maxWidth = Math.max(maxWidth, box.right + borderGap);
 		maxHeight = Math.max(maxHeight, box.bottom + borderGap);
 		boxes.push(box);
 		ownerMap.set(n, box);
-		return box;
+		return extraHorizontal;
 	};
 
 	override function update(elapsed:Float) {
@@ -138,15 +151,15 @@ class BTreeVisualizer extends FlxBasic {
 		return null;
 	}
 
-	function exploreNode(n:Node, depth:Int, row:Int):Int {
-		makeNodeBox(n, depth, row);
+	function exploreNode(n:Node, depth:Int, row:Int, extraHorizontal:Int):Int {
+		extraHorizontal = makeNodeBox(n, depth, row, extraHorizontal);
 		@:privateAccess
 		var children = n.getChildren();
 		for (i in 0...children.length) {
 			if (i > 0) {
 				row += 1;
 			}
-			row = exploreNode(children[i], depth + 1, row);
+			row = exploreNode(children[i], depth + 1, row, extraHorizontal);
 		}
 		return row;
 	};
@@ -196,6 +209,8 @@ class BTreeVisualizer extends FlxBasic {
 			_matrix.translate(rect.x + iconStamp.origin.x, rect.y + iconStamp.origin.y);
 			var brushBlend:BlendMode = iconStamp.blend;
 			treeGraph.draw(iconStamp.framePixels, _matrix, null, brushBlend, null, true);
+
+			drawNodeNameBox(node);
 		}
 
 		shapeDrawer.graphics.clear();
@@ -214,9 +229,65 @@ class BTreeVisualizer extends FlxBasic {
 		composite.draw(treeGraph);
 	}
 
+	private function drawNodeNameBox(node:Node) {
+		var name = node.getName();
+		if (name == null || name == "") {
+			return;
+		}
+
+		var cRect = ownerMap.get(node);
+		var textMatrix = new Matrix();
+		var textField = new TextField();
+		var textFormat = new TextFormat(FlxAssets.FONT_DEFAULT, 10, FlxColor.WHITE);
+
+		textField.text = node.getName();
+		textField.embedFonts = true;
+		textFormat.size = 10;
+		textFormat.color = FlxColor.WHITE;
+
+		// Set textFormat _after_ setting the text into the field to avoid weird defaults getting set
+		// due to an empty string
+		textField.setTextFormat(textFormat);
+		textField.textColor = FlxColor.WHITE;
+		textField.width += 10;
+
+		var bitmapData = new BitmapData(Std.int(textField.width), Std.int(textField.height), true, 0x00000000);
+		bitmapData.draw(textField);
+
+		var gfx = shapeDrawer.graphics;
+		textMatrix.identity(); // Reset our matrix
+		textMatrix.translate(cRect.left - 2, cRect.top - 22);
+		gfx.beginBitmapFill(bitmapData, textMatrix);
+		gfx.drawRect(cRect.left - 2, cRect.top - 22, bitmapData.width, bitmapData.height);
+		gfx.endFill();
+
+		gfx.lineStyle(2, FlxColor.WHITE);
+		var size = getChildLimits(node);
+		gfx.drawRect(cRect.left - 7, cRect.top - 7, size.x + 10, size.y + 10);
+		treeGraph.draw(shapeDrawer);
+		shapeDrawer.graphics.clear();
+	}
+
+	private function getChildLimits(node:Node):FlxPoint {
+		var max = FlxPoint.get();
+		var hunt:(n:Node) -> Void;
+		hunt = (n:Node) -> {
+			var cRect = ownerMap.get(n);
+			max.set(Math.max(max.x, cRect.right), Math.max(max.y, cRect.bottom));
+			@:privateAccess
+			for (c in n.getChildren()) {
+				hunt(c);
+			}
+		}
+		hunt(node);
+		var nRect = ownerMap.get(node);
+		max.subtract(nRect.left, nRect.top);
+		return max;
+	}
+
 	public function build() {
 		@:privateAccess
-		exploreNode(exec.root, 0, 0);
+		exploreNode(exec.root, 0, 0, 0);
 		buildTreeGraphic();
 	}
 }
