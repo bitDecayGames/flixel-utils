@@ -1,6 +1,7 @@
 package bitdecay.flixel.debug.tools.btree;
 
 #if FLX_DEBUG
+import bitdecay.flixel.debug.tools.btree.BTreeInspector.TreeNav;
 import bitdecay.behavior.Tools;
 import bitdecay.behavior.tree.context.BTContext;
 import haxe.ds.ArraySort;import flixel.FlxG;
@@ -62,6 +63,7 @@ class BTreeInspectorWindow extends DebugToolWindow {
 	var footerText:String = "";
 
 	public var onClick = new FlxTypedSignal<(String, Int, Int) -> Void>();
+	public var onChange = new FlxTypedSignal<(String) -> Void>();
 
 	public function new(icon:BitmapData) {
 		super("BTree Inspector", icon);
@@ -178,6 +180,7 @@ class BTreeInspectorWindow extends DebugToolWindow {
 
 		if (dirty) {
 			dirty = false;
+			onChange.dispatch(_curEntry.name);
 			refreshCanvas();
 		}
 	}
@@ -242,23 +245,34 @@ class BTreeInspectorWindow extends DebugToolWindow {
 
 	function resetSettings():Void {
 		if (_curEntry != null && _canvas != null) {
-			zoom = Math.min(_canvas.height / _curEntry.bitmap.height, _canvas.width / _curEntry.bitmap.width);
+			if (_curEntry.nav.zoom == 0) {
+				zoom = Math.min(_canvas.height / _curEntry.bitmap.height, _canvas.width / _curEntry.bitmap.width);
+			} else {
+				zoom = Math.min(_curEntry.nav.zoom, _curEntry.nav.zoom);
+			}
 		} else {
 			zoom = 1;
 		}
 		requestedZoom = zoom;
-		_curRenderOffsetRaw.set();
+		_curRenderOffsetRaw.set(_curEntry.nav.xOffset, _curEntry.nav.yOffset);
 	}
 
 	/**
 	 * Add a BitmapData to the log
 	 */
-	public function add(bmp:BitmapData, name:String = ""):Bool {
+	public function add(bmp:BitmapData, name:String = "", nav:TreeNav):Bool {
 		if (bmp == null) {
 			return false;
 		}
 		setVisible(true);
-		_entries.push({bitmap: bmp, name: name});
+		if (nav == null) {
+			nav = {
+				zoom: 0,
+				xOffset: 0,
+				yOffset: 0
+			};
+		}
+		_entries.push({bitmap: bmp, name: name, nav: nav});
 		resetSettings();
 		dirty = true;
 		return true;
@@ -476,5 +490,6 @@ class BTreeInspectorWindow extends DebugToolWindow {
 typedef TreeVisEntry = {
 	bitmap:BitmapData,
 	name:String,
+	nav:TreeNav,
 }
 #end

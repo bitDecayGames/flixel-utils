@@ -1,11 +1,11 @@
 package bitdecay.flixel.debug.tools.btree;
 
-import flixel.util.FlxColor;
 #if debug
 import bitdecay.behavior.tree.BTExecutor;
 import bitdecay.behavior.tree.Node;
 import bitdecay.flixel.debug.DebugTool.BaseToolData;
 import flixel.FlxG;
+import flixel.util.FlxColor;
 import openfl.display.BitmapData;
 import openfl.display.Loader;
 import openfl.events.Event;
@@ -42,6 +42,7 @@ class BTreeInspector extends DebugTool<BTreeInspectorWindow> {
 		super("btree", iconData);
 
 		window.onClick.add(handleClick);
+		window.onChange.add(handleChange);
 
 		FlxG.signals.preStateSwitch.add(clear);
 	}
@@ -74,7 +75,7 @@ class BTreeInspector extends DebugTool<BTreeInspectorWindow> {
 			for (name => btree in pendingAdds) {
 				var visualizer = new BTreeVisualizer(btree);
 				visualizer.build();
-				window.add(visualizer.composite, name);
+				window.add(visualizer.composite, name, getNavSettings(name));
 				trees.set(name, visualizer);
 			}
 			pendingAdds.clear();
@@ -107,7 +108,7 @@ class BTreeInspector extends DebugTool<BTreeInspectorWindow> {
 
 	override function getDefaults():Dynamic {
 		var defaults = super.getDefaults();
-		defaults.googly = 1.25;
+		defaults.trees = [];
 		return defaults;
 	}
 
@@ -116,6 +117,41 @@ class BTreeInspector extends DebugTool<BTreeInspectorWindow> {
 		var newFocus = vis.nodeAtPoint(x, y);
 		vis.focusNode = newFocus;
 		focusNode = newFocus;
+	}
+
+	function handleChange(name:String) {
+		@:privateAccess {
+			var data:BTreeInspectorData = cast FlxG.save.data.debugSuite.btree;
+			for (saveTree in data.trees) {
+				if (saveTree.name == name) {
+					saveTree.zoom = window.zoom;
+					saveTree.xOffset = window._curRenderOffsetRaw.x;
+					saveTree.yOffset = window._curRenderOffsetRaw.y;
+					FlxG.save.flush();
+					return;
+				}
+			}
+
+			var newVis:TreeNav = {
+				name: name,
+				zoom: window.zoom,
+				xOffset: window._curRenderOffsetRaw.x,
+				yOffset: window._curRenderOffsetRaw.y,
+			}
+			data.trees.push(newVis);
+			FlxG.save.flush();
+		}
+	}
+
+	function getNavSettings(name:String):TreeNav {
+		var data:BTreeInspectorData = cast FlxG.save.data.debugSuite.btree;
+		for (saveTree in data.trees) {
+			@:privateAccess
+			if (saveTree.name == name) {
+				return saveTree;
+			}
+		}
+		return null;
 	}
 
 	override function makeWindow(icon:BitmapData):BTreeInspectorWindow {
@@ -128,6 +164,13 @@ class BTreeInspector extends DebugTool<BTreeInspectorWindow> {
 }
 
 typedef BTreeInspectorData = BaseToolData & {
-	var ?googly:Float;
+	var ?trees:Array<TreeNav>;
+}
+
+typedef TreeNav = {
+	var ?name:String;
+	var ?zoom:Float;
+	var ?xOffset:Float;
+	var ?yOffset:Float;
 }
 #end

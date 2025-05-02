@@ -1,11 +1,5 @@
 package bitdecay.flixel.debug.tools.btree;
 
-import flixel.math.FlxPoint;
-import flixel.system.FlxAssets;
-import openfl.geom.Matrix;
-import openfl.geom.Rectangle;
-import openfl.text.TextField;
-import openfl.text.TextFormat;
 #if debug
 import bitdecay.behavior.tree.BTExecutor;
 import bitdecay.behavior.tree.Node;
@@ -17,11 +11,17 @@ import flixel.FlxBasic;
 import flixel.FlxSprite;
 import flixel.math.FlxAngle;
 import flixel.math.FlxMatrix;
+import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
+import flixel.system.FlxAssets;
 import flixel.util.FlxColor;
 import openfl.display.BitmapData;
 import openfl.display.BlendMode;
 import openfl.display.Shape;
+import openfl.geom.Matrix;
+import openfl.geom.Rectangle;
+import openfl.text.TextField;
+import openfl.text.TextFormat;
 
 class BTreeVisualizer extends FlxBasic {
 	var exec:BTExecutor;
@@ -78,6 +78,9 @@ class BTreeVisualizer extends FlxBasic {
 		SUCCESS => FlxColor.BLUE.getDarkened(.5),
 		FAIL => FlxColor.RED.getDarkened(.5),
 		UNKNOWN => FlxColor.BLACK
+	];
+	var nodeColorMap:Map<String, FlxColor> = [
+		Type.getClassName(HierarchicalContext) => FlxColor.PINK.getDarkened(),
 	];
 
 	public function new(exec:BTExecutor) {
@@ -229,6 +232,11 @@ class BTreeVisualizer extends FlxBasic {
 		composite.draw(treeGraph);
 	}
 
+	// helpers for rendering text to our debug image
+	var textField:TextField = null;
+	var textMatrix = new Matrix();
+	var textFormat:TextFormat = null;
+
 	private function drawNodeNameBox(node:Node) {
 		var name = node.getName();
 		if (name == null || name == "") {
@@ -236,32 +244,27 @@ class BTreeVisualizer extends FlxBasic {
 		}
 
 		var cRect = ownerMap.get(node);
-		var textMatrix = new Matrix();
-		var textField = new TextField();
-		var textFormat = new TextFormat(FlxAssets.FONT_DEFAULT, 10, FlxColor.WHITE);
+		var color = getNodeColor(node);
+
+		if (textField == null) {
+			textFormat = new TextFormat(FlxAssets.FONT_DEFAULT, 10, FlxColor.WHITE);
+			textField = new TextField();
+			textField.embedFonts = true;
+		}
 
 		textField.text = node.getName();
-		textField.embedFonts = true;
-		textFormat.size = 10;
-		textFormat.color = FlxColor.WHITE;
-
 		// Set textFormat _after_ setting the text into the field to avoid weird defaults getting set
-		// due to an empty string
-		textField.setTextFormat(textFormat);
-		textField.textColor = FlxColor.WHITE;
-		textField.width += 10;
+		// due to an empty stringtextField.setTextFormat(textFormat);
+		textField.textColor = color;
+		textField.width += 10; // for some reason our width was smaller than our text, so it was getting cut off
 
-		var bitmapData = new BitmapData(Std.int(textField.width), Std.int(textField.height), true, 0x00000000);
-		bitmapData.draw(textField);
 
-		var gfx = shapeDrawer.graphics;
 		textMatrix.identity(); // Reset our matrix
 		textMatrix.translate(cRect.left - 2, cRect.top - 22);
-		gfx.beginBitmapFill(bitmapData, textMatrix);
-		gfx.drawRect(cRect.left - 2, cRect.top - 22, bitmapData.width, bitmapData.height);
-		gfx.endFill();
+		treeGraph.draw(textField, textMatrix);
 
-		gfx.lineStyle(2, FlxColor.WHITE);
+		var gfx = shapeDrawer.graphics;
+		gfx.lineStyle(2, color);
 		var size = getChildLimits(node);
 		gfx.drawRect(cRect.left - 7, cRect.top - 7, size.x + 10, size.y + 10);
 		treeGraph.draw(shapeDrawer);
@@ -289,6 +292,15 @@ class BTreeVisualizer extends FlxBasic {
 		@:privateAccess
 		exploreNode(exec.root, 0, 0, 0);
 		buildTreeGraphic();
+	}
+
+	function getNodeColor(n:Node):FlxColor {
+		var nodeClass = Type.getClassName(Type.getClass(n));
+		if (nodeColorMap.exists(nodeClass)) {
+			return nodeColorMap.get(nodeClass);
+		}
+
+		return FlxColor.WHITE;
 	}
 }
 #end
