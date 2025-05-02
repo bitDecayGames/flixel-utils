@@ -121,7 +121,7 @@ class BTreeInspector extends DebugTool<BTreeInspectorWindow> {
 
 	function handleChange(name:String) {
 		@:privateAccess {
-			var data:BTreeInspectorData = cast FlxG.save.data.debugSuite.btree;
+			var data:BTreeInspectorData = data;
 			for (saveTree in data.trees) {
 				if (saveTree.name == name) {
 					saveTree.zoom = window.zoom;
@@ -144,7 +144,7 @@ class BTreeInspector extends DebugTool<BTreeInspectorWindow> {
 	}
 
 	function getNavSettings(name:String):TreeNav {
-		var data:BTreeInspectorData = cast FlxG.save.data.debugSuite.btree;
+		var data:BTreeInspectorData = data;
 		for (saveTree in data.trees) {
 			@:privateAccess
 			if (saveTree.name == name) {

@@ -14,6 +14,7 @@ class DebugTool<T:DebugToolWindow> {
 	var name:String;
 	var button:FlxSystemButton;
 	var window:T;
+	var data:Dynamic;
 
 	public var enabled(default, set) = true;
 
@@ -66,14 +67,14 @@ class DebugTool<T:DebugToolWindow> {
 		if (!FlxG.save.isBound)
 			return;
 
-		var toolData = Reflect.getProperty(FlxG.save.data.debugSuite, name);
-		enabled = toolData.enabled;
+		data = Reflect.getProperty(FlxG.save.data.debugSuite, name);
+		enabled = data.enabled;
 
 		@:privateAccess {
-			window._width = toolData.windowWid;
-			window._height = toolData.windowHei;
+			window._width = data.windowWid;
+			window._height = data.windowHei;
 			window.updateSize();
-			window.reposition(toolData.windowX, toolData.windowY);
+			window.reposition(data.windowX, data.windowY);
 		}
 	}
 
@@ -83,7 +84,7 @@ class DebugTool<T:DebugToolWindow> {
 
 		window.visible = value;
 
-		Reflect.getProperty(FlxG.save.data.debugSuite, name).enabled = value;
+		data.enabled = value;
 		FlxG.save.flush();
 
 		return enabled = value;
@@ -95,14 +96,14 @@ class DebugTool<T:DebugToolWindow> {
 	}
 
 	function handleResize(width:Int, height:Int):Void {
-		var saveData:BaseToolData = Reflect.getProperty(FlxG.save.data.debugSuite, name);
+		var saveData:BaseToolData = data;
 		saveData.windowWid = width;
 		saveData.windowHei = height;
 		FlxG.save.flush();
 	}
 
 	function handleReposition(x:Int, y:Int):Void {
-		var saveData:BaseToolData = Reflect.getProperty(FlxG.save.data.debugSuite, name);
+		var saveData:BaseToolData = data;
 		saveData.windowX = x;
 		saveData.windowY = y;
 		FlxG.save.flush();

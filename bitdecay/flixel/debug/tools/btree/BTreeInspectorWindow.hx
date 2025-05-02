@@ -264,7 +264,6 @@ class BTreeInspectorWindow extends DebugToolWindow {
 		if (bmp == null) {
 			return false;
 		}
-		setVisible(true);
 		if (nav == null) {
 			nav = {
 				zoom: 0,
