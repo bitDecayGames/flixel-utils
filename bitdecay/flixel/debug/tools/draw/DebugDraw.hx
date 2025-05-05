@@ -1,14 +1,12 @@
 package bitdecay.flixel.debug.tools.draw;
 
-import flixel.FlxBasic;
+import bitdecay.flixel.debug.DebugTool.BaseToolData;
 import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
 import flixel.system.ui.FlxSystemButton;
-import flixel.util.FlxColor;
 import openfl.display.BitmapData;
-import openfl.display.Graphics;
 import openfl.geom.Matrix;
 import openfl.text.TextField;
 import openfl.text.TextFormat;
@@ -17,7 +15,7 @@ import openfl.text.TextFormat;
 import bitdecay.flixel.debug.tools.draw.DebugDrawWindow;
 #end
 
-class DebugDraw extends FlxBasic {
+class DebugDraw extends DebugTool<DebugDrawWindow> {
 	public static var ME(default, null):DebugDraw;
 
 	#if FLX_DEBUG
@@ -35,8 +33,6 @@ class DebugDraw extends FlxBasic {
 		[0, 0, 0, .5, 1, 1, 1, .5, 0, 0, 0]
 	];
 
-	public static var enabled(default, set) = true;
-
 	// TODO: Can we draw this to a separate intermediate graphic rather than
 	// relying on a camera for debug drawing
 	public static var layer_enabled:Map<String, Bool> = [];
@@ -48,19 +44,8 @@ class DebugDraw extends FlxBasic {
 	private static var registeredConsole = false;
 	#end
 
-	/**
-	 * Initializes the debug drawer. Layers typically should be a list of enums provided by `Type.allEnums(<enum class>)`
-	 * and will be used to initialize the layers as well as the buttons in the debug layer window
-	**/
-	public static function init(layers:Array<Dynamic> = null, force:Bool = false) {
-		#if FLX_DEBUG
-		if (force && ME != null) {
-			FlxG.plugins.remove(ME);
-			ME.destroy();
-			ME = null;
-
-			layers = [];
-		}
+	public function new(layers:Array<Dynamic> = null) {
+		super('debugDraw', icon_data);
 
 		if (layers == null || layers.length == 0) {
 			defaultLayer = "ALL";
@@ -72,9 +57,23 @@ class DebugDraw extends FlxBasic {
 			}
 		}
 
-		if (ME == null) {
-			FlxG.plugins.addPlugin(ME = new DebugDraw());
-		}
+		window.onLayerToggle.add(updateLayerEnabled);
+		window.onCollapseToggle.add(updateCollapsed);
+	}
+
+	/**
+	 * Initializes the debug drawer. Layers typically should be a list of enums provided by `Type.allEnums(<enum class>)`
+	 * and will be used to initialize the layers as well as the buttons in the debug layer window
+	**/
+	override public function init() {
+		super.init();
+
+		#if FLX_DEBUG
+		ME = this;
+
+		// draw needs to be done at a specific point in the render pipeline that
+		// happens to coincide with plugins, so we use this mechanism
+		FlxG.plugins.addPlugin(this);
 
 		if (!registeredConsole) {
 			FlxG.console.registerFunction("debugdraw", function() {
@@ -82,23 +81,6 @@ class DebugDraw extends FlxBasic {
 				FlxG.log.notice('DebugDraw enabled: $enabled');
 			});
 		}
-
-		if (draw_debug_button == null) {
-			var icon = new BitmapData(11, 11, true, FlxColor.TRANSPARENT);
-			for (y in 0...icon_data.length) {
-				for (x in 0...icon_data[y].length) {
-					if (icon_data[y][x] > 0) {
-						icon.setPixel32(x, y, FlxColor.fromRGBFloat(1, 1, 1, icon_data[y][x]));
-					}
-				}
-			}
-
-			debug_window = new DebugDrawWindow(icon);
-			FlxG.game.debugger.addWindow(debug_window);
-
-			draw_debug_button = FlxG.debugger.addButton(RIGHT, icon, () -> enabled = !enabled, true, true);
-		}
-		enabled = debug_window.enabled(); // TODO: This is kinda circular... clean it up
 		#else
 		// if we aren't in debug, just set this to the no-op implementation
 		ME = new DebugDraw();
@@ -118,6 +100,46 @@ class DebugDraw extends FlxBasic {
 	// Matrix to aid in getting text to render where we want on-screen
 	private var textMatrix = new Matrix();
 	private var textFormat:TextFormat = null;
+
+	override function makeWindow(icon:BitmapData):DebugDrawWindow {
+		return new DebugDrawWindow(icon);
+	}
+
+	function updateLayerEnabled(name:String, on:Bool) {
+		layer_enabled[name] = on;
+		data.layers.set(name, on);
+		FlxG.save.flush();
+	}
+
+	function updateCollapsed(collapsed:Bool) {
+		data.collapsed = collapsed;
+		FlxG.save.flush();
+	}
+
+	override function loadData():Bool {
+		if (!super.loadData()) {
+			return false;
+		}
+
+		for (key => value in layer_enabled) {
+			if (!data.layers.exists(key)) {
+				data.layers.set(key, value);
+			}
+
+			if (!data.layers.get(key)) {
+				layer_enabled[key] = false;
+			}
+		}
+		window.setLayers(layer_enabled);
+		return true;
+	}
+
+	override function getDefaults():Dynamic {
+		var defaults:DebugDrawData = {};
+		defaults.layers = [];
+		defaults.collapsed = false;
+		return defaults;
+	}
 
 	public function setDrawFont(name:String, size:Int) {
 		textFormat = new TextFormat(name, size, 0xFFFFFF);
@@ -373,13 +395,7 @@ class DebugDraw extends FlxBasic {
 		return point;
 	}
 
-	override function update(delta:Float) {
-		calls = [];
-	}
-
 	override function draw() {
-		super.draw();
-
 		if (!enabled) {
 			return;
 		}
@@ -392,18 +408,8 @@ class DebugDraw extends FlxBasic {
 		for (drawCall in calls) {
 			drawCall();
 		}
-	}
 
-	static function set_enabled(value:Bool) {
-		if (draw_debug_button != null)
-			draw_debug_button.toggled = !value;
-
-		DebugDraw.enabled = value;
-		debug_window.visible = value;
-		FlxG.save.data.bitdecayDebug.enabled = value;
-		FlxG.save.flush();
-
-		return enabled = value;
+		calls = [];
 	}
 	#else
 	// all no-ops when not in debug. Inline to save function call if compiler doesn't optimize it out
@@ -422,4 +428,9 @@ class DebugDraw extends FlxBasic {
 	public inline function drawCameraText(?cam:FlxCamera, x:Float, y:Float, text:String, size:Int = 10, layer:Dynamic = null, color:Int = 0xFF00FF) {}
 	
 	#end
+}
+
+typedef DebugDrawData = BaseToolData & {
+	var ?layers:Map<String, Bool>;
+	var ?collapsed:Bool;
 }

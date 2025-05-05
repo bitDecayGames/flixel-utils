@@ -64,13 +64,16 @@ class BTreeInspector extends DebugTool<BTreeInspectorWindow> {
         loader.loadBytes(bytes.getData());
 	}
 
-	override function loadData() {
-		super.loadData();
+	override function loadData():Bool {
+		if (!super.loadData()) {
+			return false;
+		}
 
 		window.resize(window.width, window.height);
+		return true;
 	}
 
-	override function update() {
+	override function update(elapsed:Float) {
 		if (nodeIconBitmap != null) {
 			for (name => btree in pendingAdds) {
 				var visualizer = new BTreeVisualizer(btree);

@@ -1,5 +1,6 @@
 package bitdecay.flixel.debug.tools.draw;
 
+import flixel.util.FlxSignal.FlxTypedSignal;
 #if FLX_DEBUG
 import bitdecay.flixel.debug.tools.draw.DebugDraw;
 import flixel.FlxG;
@@ -13,7 +14,7 @@ import openfl.text.TextField;
 /**
  * A simple window that provides toggle buttons for each custom debug draw layers
 **/
-class DebugDrawWindow extends Window {
+class DebugDrawWindow extends DebugToolWindow {
 	/**
 	 * How often to update the stats, in ms. The lower, the more performance-intense!
 	 */
@@ -30,10 +31,15 @@ class DebugDrawWindow extends Window {
 
 	private var labels = new Map<String, TextField>();
 
+	public var onLayerToggle = new FlxTypedSignal<(String, Bool) -> Void>();
+	public var onCollapseToggle = new FlxTypedSignal<(Bool) -> Void>();
+
+	var gutter = 5;
+	var buttonStartY:Int = 0;
+
 	public function new(icon:BitmapData) {
 		super("Layers", icon, 0, 0, false);
 
-		var gutter:Int = 5;
 		var nextY:Int = Std.int(_header.height) + gutter;
 
 		collapseLabel = DebuggerUtil.createTextField(gutter, nextY, FlxColor.BLACK, TEXT_SIZE);
@@ -57,10 +63,20 @@ class DebugDrawWindow extends Window {
 
 		nextY += Std.int(callCountLabel.height + gutter);
 
-		collapsedSizeMin = nextY;
+		buttonStartY = nextY;
 
-		for (layerName => _ in DebugDraw.layer_enabled) {
+		loadData();
+		updateCollapse();
+	}
+
+	public function setLayers(layers:Map<String, Bool>) {
+		minSize.x = callCountLabel.width;
+
+		var nextY = buttonStartY;
+
+		for (layerName => layerOn in layers) {
 			var layerLabel = DebuggerUtil.createTextField(gutter, nextY, FlxColor.BLACK, TEXT_SIZE);
+			var layerEnabled = layerOn;
 			addChild(layerLabel);
 			layerLabel.border = true;
 			layerLabel.borderColor = FlxColor.BLACK;
@@ -68,9 +84,12 @@ class DebugDrawWindow extends Window {
 			layerLabel.backgroundColor = FlxColor.WHITE;
 			layerLabel.text = layerName;
 			layerLabel.addEventListener(MouseEvent.CLICK, (me) -> {
-				toggle(layerName);
+				layerEnabled = !layerEnabled;
+				layerLabel.backgroundColor = layerEnabled ? FlxColor.WHITE : FlxColor.GRAY;
+				onLayerToggle.dispatch(layerName, layerEnabled);
 			});
 			labels.set(layerName, layerLabel);
+			layerLabel.backgroundColor = DebugDraw.layer_enabled[layerName] ? FlxColor.WHITE : FlxColor.GRAY;
 
 			nextY += Std.int(layerLabel.height + gutter);
 			minSize.x = Math.max(minSize.x, layerLabel.width);
@@ -78,9 +97,6 @@ class DebugDrawWindow extends Window {
 
 		minSize.x += gutter * 2;
 		fullSizeMin = nextY;
-
-		loadData();
-		updateCollapse();
 	}
 
 	var _currentTime:Int;
@@ -126,27 +142,9 @@ class DebugDrawWindow extends Window {
 			bound();
 			reposition(x, y);
 
-			FlxG.save.data.bitdecayDebug.collapsed = collapsed;
-			FlxG.save.flush();
+			onCollapseToggle.dispatch(collapsed);
 	}
 
-	public function enabled():Bool {
-		if (!FlxG.save.isBound)
-			return false;
-
-		if (FlxG.save.data.bitdecayDebug == null) {
-			initDebugLayerSave();
-		}
-
-		return FlxG.save.data.bitdecayDebug.enabled;
-	}
-
-	function toggle(layerName:String) {
-		DebugDraw.layer_enabled[layerName] = !DebugDraw.layer_enabled[layerName];
-		labels[layerName].backgroundColor = DebugDraw.layer_enabled[layerName] ? FlxColor.WHITE : FlxColor.GRAY;
-		FlxG.save.data.bitdecayDebug.layers.set(layerName, DebugDraw.layer_enabled[layerName]);
-		FlxG.save.flush();
-	}
 
 	function loadData() {
 		if (!FlxG.save.isBound)

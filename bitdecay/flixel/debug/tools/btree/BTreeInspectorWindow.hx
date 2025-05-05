@@ -178,7 +178,7 @@ class BTreeInspectorWindow extends DebugToolWindow {
 			_lastMousePos.set(mouseX, mouseY);
 		}
 
-		if (dirty) {
+		if (dirty && _curEntry != null) {
 			dirty = false;
 			onChange.dispatch(_curEntry.name);
 			refreshCanvas();
@@ -266,7 +266,7 @@ class BTreeInspectorWindow extends DebugToolWindow {
 		}
 		if (nav == null) {
 			nav = {
-				zoom: 0,
+				zoom: 1,
 				xOffset: 0,
 				yOffset: 0
 			};

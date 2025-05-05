@@ -10,7 +10,7 @@ import flixel.util.FlxColor;
 import openfl.display.BitmapData;
 using flixel.util.FlxBitmapDataUtil;
 
-class DebugTool<T:DebugToolWindow> {
+class DebugTool<T:DebugToolWindow> extends FlxBasic {
 	var name:String;
 	var button:FlxSystemButton;
 	var window:T;
@@ -19,6 +19,7 @@ class DebugTool<T:DebugToolWindow> {
 	public var enabled(default, set) = true;
 
 	public function new(dataName:String, iconData:Array<Array<Float>>) {
+		super();
 		name = dataName;
 		var icon = iconFromData(iconData);
 		window = makeWindow(icon);
@@ -32,7 +33,7 @@ class DebugTool<T:DebugToolWindow> {
 		button = FlxG.debugger.addButton(RIGHT, icon, () -> enabled = !enabled, true, true);
 	}
 
-	public function update() {
+	override public function update(elapsed:Float) {
 		
 	}
 
@@ -63,9 +64,9 @@ class DebugTool<T:DebugToolWindow> {
 	}
 
 	// Handle any initial load when the app starts
-	function loadData() {
+	function loadData():Bool {
 		if (!FlxG.save.isBound)
-			return;
+			return false;
 
 		data = Reflect.getProperty(FlxG.save.data.debugSuite, name);
 		enabled = data.enabled;
@@ -76,6 +77,8 @@ class DebugTool<T:DebugToolWindow> {
 			window.updateSize();
 			window.reposition(data.windowX, data.windowY);
 		}
+
+		return true;
 	}
 
 	function set_enabled(value:Bool) {
@@ -91,8 +94,7 @@ class DebugTool<T:DebugToolWindow> {
 	}
 
 	function makeWindow(icon:BitmapData):T {
-		// Override to create tooling window
-		return null;
+		throw "Debug Tools must override makeWindow";
 	}
 
 	function handleResize(width:Int, height:Int):Void {
