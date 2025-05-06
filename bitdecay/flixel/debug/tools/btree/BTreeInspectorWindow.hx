@@ -173,7 +173,7 @@ class BTreeInspectorWindow extends DebugToolWindow {
 		super.update();
 		if (_middleMouseDown) {
 			var delta = FlxPoint.get(mouseX, mouseY);
-			_curRenderOffsetRaw.add(delta.subtract(_lastMousePos));
+			_curRenderOffsetRaw.add(delta.subtractPoint(_lastMousePos));
 			dirty = true;
 			_lastMousePos.set(mouseX, mouseY);
 		}
@@ -334,7 +334,7 @@ class BTreeInspectorWindow extends DebugToolWindow {
 		_matrix.scale(zoom, zoom);
 		if (requestedZoom != zoom) {
 			// get vector from mouse to top-left of graphic
-			var offsetMath = FlxPoint.get().copyFrom(_curRenderOffsetRaw).subtract(_zoomCenter);
+			var offsetMath = FlxPoint.get().copyFrom(_curRenderOffsetRaw).subtractPoint(_zoomCenter);
 			// invert zoom to find raw length of vector
 			offsetMath.scale(1/zoom);
 			// apply new zoom to get length of vector at new zoom scale
