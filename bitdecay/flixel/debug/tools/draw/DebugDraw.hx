@@ -131,6 +131,7 @@ class DebugDraw extends DebugTool<DebugDrawWindow> {
 			}
 		}
 		window.setLayers(layer_enabled);
+		window.collapsed = data.collapsed;
 		return true;
 	}
 

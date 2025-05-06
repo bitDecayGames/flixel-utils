@@ -25,7 +25,7 @@ class DebugDrawWindow extends DebugToolWindow {
 	private var callCountLabel:TextField;
 
 	private var collapseLabel:TextField;
-	private var collapsed:Bool = false;
+	public var collapsed(default, set):Bool = false;
 	private var fullSizeMin:Float = 0;
 	private var collapsedSizeMin:Float = 0;
 
@@ -50,7 +50,6 @@ class DebugDrawWindow extends DebugToolWindow {
 		collapseLabel.text = "Collapse";
 		collapseLabel.addEventListener(MouseEvent.CLICK, (me) -> {
 			collapsed = !collapsed;
-			updateCollapse();
 		});
 		addChild(collapseLabel);
 
@@ -63,10 +62,8 @@ class DebugDrawWindow extends DebugToolWindow {
 
 		nextY += Std.int(callCountLabel.height + gutter);
 
+		collapsedSizeMin = nextY;
 		buttonStartY = nextY;
-
-		loadData();
-		updateCollapse();
 	}
 
 	public function setLayers(layers:Map<String, Bool>) {
@@ -121,8 +118,8 @@ class DebugDrawWindow extends DebugToolWindow {
 		}
 	}
 
-	function updateCollapse() {
-			if (collapsed) {
+	public function set_collapsed(newCollapse:Bool) {
+			if (newCollapse) {
 				collapseLabel.text = "Expand";
 				minSize.y = collapsedSizeMin;
 				maxSize.y = collapsedSizeMin;
@@ -135,14 +132,15 @@ class DebugDrawWindow extends DebugToolWindow {
 			collapseLabel.visible = true;
 
 			for (l in labels) {
-				l.visible = !collapsed;
+				l.visible = !newCollapse;
 			}
 
 			updateSize();
 			bound();
 			reposition(x, y);
 
-			onCollapseToggle.dispatch(collapsed);
+			onCollapseToggle.dispatch(newCollapse);
+			return collapsed = newCollapse;
 	}
 
 
