@@ -1,7 +1,9 @@
 package bitdecay.flixel.debug.tools.draw;
 
-import flixel.util.FlxSignal.FlxTypedSignal;
+
 #if FLX_DEBUG
+import bitdecay.flixel.debug.DebugUI.SimpleButtonCfg;
+import flixel.util.FlxSignal.FlxTypedSignal;
 import bitdecay.flixel.debug.tools.draw.DebugDraw;
 import flixel.FlxG;
 import flixel.system.debug.DebuggerUtil;
@@ -42,15 +44,15 @@ class DebugDrawWindow extends DebugToolWindow {
 
 		var nextY:Int = Std.int(_header.height) + gutter;
 
-		collapseLabel = DebuggerUtil.createTextField(gutter, nextY, FlxColor.BLACK, TEXT_SIZE);
-		collapseLabel.border = true;
-		collapseLabel.borderColor = FlxColor.BLACK;
-		collapseLabel.background = true;
-		collapseLabel.backgroundColor = FlxColor.WHITE;
-		collapseLabel.text = "Collapse";
-		collapseLabel.addEventListener(MouseEvent.CLICK, (me) -> {
-			collapsed = !collapsed;
-		});
+		var collapseBtnCfg:SimpleButtonCfg = {
+			label: "Collapse",
+			textSize: TEXT_SIZE,
+			labelColor: FlxColor.BLACK,
+			borderColor: FlxColor.BLACK,
+			bgColor: FlxColor.WHITE,
+			onClick: (_, _) -> { collapsed = !collapsed; }
+		};
+		collapseLabel = DebugUI.makeLabelButton(gutter, nextY, collapseBtnCfg);
 		addChild(collapseLabel);
 
 		nextY += Std.int(collapseLabel.height + gutter);
@@ -66,25 +68,30 @@ class DebugDrawWindow extends DebugToolWindow {
 		buttonStartY = nextY;
 	}
 
+
+
 	public function setLayers(layers:Map<String, Bool>) {
 		minSize.x = callCountLabel.width;
 
 		var nextY = buttonStartY;
 
 		for (layerName => layerOn in layers) {
-			var layerLabel = DebuggerUtil.createTextField(gutter, nextY, FlxColor.BLACK, TEXT_SIZE);
 			var layerEnabled = layerOn;
+			var layerBtnCfg:SimpleButtonCfg = {
+				label: layerName,
+				textSize: TEXT_SIZE,
+				labelColor: FlxColor.BLACK,
+				borderColor: FlxColor.BLACK,
+				bgColor: FlxColor.WHITE,
+				onClick: (l, _) -> {
+					layerEnabled = !layerEnabled;
+					l.backgroundColor = layerEnabled ? FlxColor.WHITE : FlxColor.GRAY;
+					onLayerToggle.dispatch(layerName, layerEnabled);
+				}
+			};
+			var layerLabel = DebugUI.makeLabelButton(gutter, nextY, layerBtnCfg);
 			addChild(layerLabel);
-			layerLabel.border = true;
-			layerLabel.borderColor = FlxColor.BLACK;
-			layerLabel.background = true;
-			layerLabel.backgroundColor = FlxColor.WHITE;
-			layerLabel.text = layerName;
-			layerLabel.addEventListener(MouseEvent.CLICK, (me) -> {
-				layerEnabled = !layerEnabled;
-				layerLabel.backgroundColor = layerEnabled ? FlxColor.WHITE : FlxColor.GRAY;
-				onLayerToggle.dispatch(layerName, layerEnabled);
-			});
+
 			labels.set(layerName, layerLabel);
 			layerLabel.backgroundColor = DebugDraw.layer_enabled[layerName] ? FlxColor.WHITE : FlxColor.GRAY;
 
