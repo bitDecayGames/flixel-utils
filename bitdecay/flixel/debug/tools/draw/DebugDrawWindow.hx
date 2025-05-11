@@ -40,7 +40,7 @@ class DebugDrawWindow extends DebugToolWindow {
 	var buttonStartY:Int = 0;
 
 	public function new(icon:BitmapData) {
-		super("Layers", icon, 0, 0, false);
+		super("Debug Draw", icon, 0, 0, false);
 
 		var nextY:Int = Std.int(_header.height) + gutter;
 
@@ -60,7 +60,7 @@ class DebugDrawWindow extends DebugToolWindow {
 		addChild(callCountLabel = DebuggerUtil.createTextField(gutter, nextY, FlxColor.WHITE, TEXT_SIZE));
 		callCountLabel.text = "Draw Calls: ---";
 
-		minSize.x = callCountLabel.width;
+		minSize.x = _title.x + _title.width;
 
 		nextY += Std.int(callCountLabel.height + gutter);
 

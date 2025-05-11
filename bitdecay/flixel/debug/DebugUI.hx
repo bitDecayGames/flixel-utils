@@ -49,9 +49,6 @@ class DebugUI {
 		btn.addEventListener(MouseEvent.MOUSE_UP, (e) -> {
 			btn.backgroundColor = bgColor;
 		});
-		btn.addEventListener(MouseEvent.MOUSE_OUT, (e) -> {
-			btn.backgroundColor = bgColor;
-		});
 
 		btn.addEventListener(MouseEvent.CLICK, (me) -> {
 			cfg.onClick(btn, me);
@@ -66,5 +63,6 @@ typedef SimpleButtonCfg = {
 	var ?borderColor:FlxColor;
 	var ?labelColor:FlxColor;
 	var ?bgColor:FlxColor;
+	var ?toggle:Bool;
 	var onClick:(TextField, MouseEvent)->Void;
 }
