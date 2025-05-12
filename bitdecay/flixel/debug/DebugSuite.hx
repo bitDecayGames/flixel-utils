@@ -10,6 +10,13 @@ class DebugSuite extends FlxBasic {
 	public var tools:Array<DebugTool<Dynamic>> = [];
 
 	/**
+	 * Shorthand for `DebugSuite.get(cls)` to shorten typing
+	**/
+	public static function get<T>(cls:Class<T>):Null<T> {
+		return ME.getTool(cls);
+	}
+
+	/**
 	 * Helper function to allow calling debug functions without the need to worry about
 	 * if the debug flags are set and debug tooling is available. This will result in a
 	 * no-op if the tool is unavailable
@@ -21,9 +28,9 @@ class DebugSuite extends FlxBasic {
 	 *
 	 * `DebugSuite.tool(DebugDraw, (t) -> {t.drawCameraRect(0, 0, 50, 50, FlxColor.YELLOW);});`
 	**/
-	public static function tool<T>(toolClass:Class<T>, fn:(t:T) -> Void) {
+	public static function withTool<T>(toolClass:Class<T>, fn:(t:T) -> Void) {
 		#if debug
-		var tool = ME.getTool(toolClass);
+		var tool = get(toolClass);
 		if (tool == null) {
 			QuickLog.warn('no tool found for "${toolClass}');
 			return;
@@ -49,6 +56,9 @@ class DebugSuite extends FlxBasic {
 		super();
 	}
 
+	/**
+	 * Gets the requested tool, if it exists. Returns null otherwise
+	**/
 	public function getTool<T>(cls:Class<T>):Null<T> {
 		for (tool in tools) {
 			if (Std.isOfType(tool, cls)) {

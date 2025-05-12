@@ -123,7 +123,7 @@ class DebugDrawWindow extends DebugToolWindow {
 		_updateTimer += elapsed;
 
 		if (_updateTimer > UPDATE_DELAY) {
-			callCountLabel.text = 'Draw Calls: ${DebugSuite.ME.getTool(DebugDraw).lastCallCount}';
+			callCountLabel.text = 'Draw Calls: ${DebugSuite.get(DebugDraw).lastCallCount}';
 		}
 	}
 
