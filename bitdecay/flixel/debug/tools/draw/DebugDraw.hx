@@ -46,6 +46,14 @@ class DebugDraw extends DebugTool<DebugDrawWindow> {
 
 	private static var registeredConsole = false;
 
+	/**
+	 * How often to update the stats, in ms. The lower, the more performance-intense!
+	 */
+	static inline var UPDATE_DELAY:Int = 250;
+	var _currentTime:Int;
+	var _lastTime:Int = 0;
+	var _updateTimer:Int = 0;
+
 	public function new(layers:Array<Dynamic> = null) {
 		super('debugDraw', icon_data);
 
@@ -76,6 +84,7 @@ class DebugDraw extends DebugTool<DebugDrawWindow> {
 		// draw needs to be done at a specific point in the render pipeline that
 		// happens to coincide with plugins, so we use this mechanism
 		FlxG.plugins.addPlugin(this);
+		window.onUpdate.remove(update);
 
 		if (!registeredConsole) {
 			FlxG.console.registerFunction("debugdraw", function() {
@@ -395,6 +404,24 @@ class DebugDraw extends DebugTool<DebugDrawWindow> {
 
 		point.set((rect.right - rect.left) / 2, (rect.bottom - rect.top) / 2);
 		return point;
+	}
+
+	override function update(elapsed:Float) {
+		super.update(elapsed);
+
+		var time:Int = _currentTime = FlxG.game.ticks;
+		var elapsed:Int = time - _lastTime;
+
+		if (elapsed > UPDATE_DELAY) {
+			elapsed = UPDATE_DELAY;
+		}
+		_lastTime = time;
+
+		_updateTimer += elapsed;
+
+		if (_updateTimer > UPDATE_DELAY) {
+			window.updateDrawCallCount(lastCallCount);
+		}
 	}
 
 	override function draw() {
