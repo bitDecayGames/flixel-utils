@@ -1,7 +1,6 @@
 package bitdecay.flixel.debug;
 
 import bitdecay.flixel.system.QuickLog;
-#if debug
 import flixel.FlxBasic;
 import flixel.FlxG;
 
@@ -41,7 +40,9 @@ class DebugSuite extends FlxBasic {
 
 		ME = new DebugSuite();
 		ME.tools = tools;
+		#if FLX_DEBUG
 		ME.initSuite();
+		#end
 	}
 
 	function new() {
@@ -57,6 +58,7 @@ class DebugSuite extends FlxBasic {
 		return null;
 	}
 
+	#if FLX_DEBUG
 	function initSuite() {
 		var existingData:Dynamic = FlxG.save.data.debugSuite;
 		if (existingData == null #if forceClean || true #end) {
@@ -69,5 +71,5 @@ class DebugSuite extends FlxBasic {
 			t.init();
 		}
 	}
+	#end
 }
-#end

@@ -1,16 +1,27 @@
 package bitdecay.flixel.debug;
 
+import flixel.FlxBasic;
+
 #if FLX_DEBUG
 import bitdecay.flixel.debug.DebugToolWindow;
 import bitdecay.flixel.system.QuickLog;
-import flixel.FlxBasic;
 import flixel.FlxG;
 import flixel.system.ui.FlxSystemButton;
 import flixel.util.FlxColor;
 import openfl.display.BitmapData;
 using flixel.util.FlxBitmapDataUtil;
+#end
 
+/**
+ * The base class for a debug tool.
+ *
+ * Note: This tool compiles both with and without the FLX_DEBUG flag set.
+ * This allows for easier use within projects. Any subclass of this should
+ * follow the same pattern by making it's public interface as a set of no-op
+ * calls when not running with FLX_DEBUG
+**/
 class DebugTool<T:DebugToolWindow> extends FlxBasic {
+	#if FLX_DEBUG
 	var name:String;
 	var button:FlxSystemButton;
 	var window:T;
@@ -122,6 +133,7 @@ class DebugTool<T:DebugToolWindow> extends FlxBasic {
 		}
 		return icon;
 	}
+	#end
 }
 
 /**
@@ -134,4 +146,3 @@ typedef BaseToolData = {
 	var ?windowWid:Int;
 	var ?windowHei:Int;
 }
-#end

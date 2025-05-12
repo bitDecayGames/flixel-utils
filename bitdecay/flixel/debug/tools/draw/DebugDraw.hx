@@ -1,18 +1,21 @@
 package bitdecay.flixel.debug.tools.draw;
 
-import bitdecay.flixel.debug.DebugTool.BaseToolData;
 import flixel.FlxCamera;
-import flixel.FlxG;
-import flixel.math.FlxPoint;
-import flixel.math.FlxRect;
-import flixel.system.ui.FlxSystemButton;
+import bitdecay.flixel.debug.tools.draw.DebugDrawWindow;
+
+#if FLX_DEBUG
 import openfl.display.BitmapData;
 import openfl.geom.Matrix;
 import openfl.text.TextField;
 import openfl.text.TextFormat;
 
-#if FLX_DEBUG
-import bitdecay.flixel.debug.tools.draw.DebugDrawWindow;
+import flixel.FlxG;
+import flixel.math.FlxPoint;
+import flixel.math.FlxRect;
+import flixel.system.ui.FlxSystemButton;
+
+import bitdecay.flixel.debug.DebugTool;
+import bitdecay.flixel.debug.DebugTool.BaseToolData;
 #end
 
 class DebugDraw extends DebugTool<DebugDrawWindow> {
@@ -42,7 +45,6 @@ class DebugDraw extends DebugTool<DebugDrawWindow> {
 	static var debug_window:DebugDrawWindow;
 
 	private static var registeredConsole = false;
-	#end
 
 	public function new(layers:Array<Dynamic> = null) {
 		super('debugDraw', icon_data);
@@ -87,7 +89,6 @@ class DebugDraw extends DebugTool<DebugDrawWindow> {
 		#end
 	}
 
-	#if FLX_DEBUG
 	public var lastCallCount(default, null):Int = 0;
 
 	private var calls:Array<() -> Void> = [];
@@ -414,6 +415,11 @@ class DebugDraw extends DebugTool<DebugDrawWindow> {
 	}
 	#else
 	// all no-ops when not in debug. Inline to save function call if compiler doesn't optimize it out
+
+	public function new(layers:Array<Dynamic> = null) {
+		super();
+	}
+	
 	public inline function setDrawFont(name:String, size:Int) {}
 	
 	public inline function drawWorldRect(?cam:FlxCamera, x:Float, y:Float, width:Float, height:Float, layer:Dynamic = null, color:Int = 0xFF00FF) {}
@@ -427,11 +433,12 @@ class DebugDraw extends DebugTool<DebugDrawWindow> {
 	
 	public inline function drawWorldText(?cam:FlxCamera, x:Float, y:Float, text:String, size:Int = 10, layer:Dynamic = null, color:Int = 0xFF00FF) {}
 	public inline function drawCameraText(?cam:FlxCamera, x:Float, y:Float, text:String, size:Int = 10, layer:Dynamic = null, color:Int = 0xFF00FF) {}
-	
 	#end
 }
 
+#if FLX_DEBUG
 typedef DebugDrawData = BaseToolData & {
 	var ?layers:Map<String, Bool>;
 	var ?collapsed:Bool;
 }
+#end

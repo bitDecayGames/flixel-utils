@@ -12,11 +12,13 @@ import flixel.util.FlxColor;
 import openfl.display.BitmapData;
 import openfl.events.MouseEvent;
 import openfl.text.TextField;
+#end
 
 /**
  * A simple window that provides toggle buttons for each custom debug draw layers
 **/
 class DebugDrawWindow extends DebugToolWindow {
+	#if FLX_DEBUG
 	/**
 	 * How often to update the stats, in ms. The lower, the more performance-intense!
 	 */
@@ -121,7 +123,7 @@ class DebugDrawWindow extends DebugToolWindow {
 		_updateTimer += elapsed;
 
 		if (_updateTimer > UPDATE_DELAY) {
-			callCountLabel.text = 'Draw Calls: ${DebugDraw.ME.lastCallCount}';
+			callCountLabel.text = 'Draw Calls: ${DebugSuite.ME.getTool(DebugDraw).lastCallCount}';
 		}
 	}
 
@@ -193,5 +195,5 @@ class DebugDrawWindow extends DebugToolWindow {
 		FlxG.save.data.bitdecayDebug.windowY = Y;
 		FlxG.save.flush();
 	}
+	#end
 }
-#end

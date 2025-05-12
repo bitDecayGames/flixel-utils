@@ -8,6 +8,7 @@ import bitdecay.flixel.debug.DebugUI.SimpleButtonCfg;
  * automatically build them into a window. Nothing more, nothing less.
 **/
 class SimpleDebugToolWindow extends DebugToolWindow {
+	#if FLX_DEBUG
 	public function new(title:String, ?icon:BitmapData, btnCfgs:Array<SimpleButtonCfg>) {
 		super(title, icon, 0, 0, false);
 
@@ -21,4 +22,5 @@ class SimpleDebugToolWindow extends DebugToolWindow {
 			minSize.y = Math.max(minSize.y, nextY);
 		}
 	}
+	#end
 }

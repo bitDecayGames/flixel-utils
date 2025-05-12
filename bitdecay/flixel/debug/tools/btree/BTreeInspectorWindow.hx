@@ -1,10 +1,13 @@
 package bitdecay.flixel.debug.tools.btree;
 
-#if FLX_DEBUG
+import openfl.display.BitmapData;
 import bitdecay.flixel.debug.tools.btree.BTreeInspector.TreeNav;
+
+#if FLX_DEBUG
 import bitdecay.behavior.Tools;
 import bitdecay.behavior.tree.context.BTContext;
-import haxe.ds.ArraySort;import flixel.FlxG;
+import haxe.ds.ArraySort;
+import flixel.FlxG;
 import flixel.math.FlxMath;
 import flixel.math.FlxPoint;
 import flixel.system.debug.DebuggerUtil;
@@ -17,7 +20,6 @@ import flixel.util.FlxDestroyUtil;
 import flixel.util.FlxSignal.FlxTypedSignal;
 import flixel.util.FlxSpriteUtil;
 import openfl.display.Bitmap;
-import openfl.display.BitmapData;
 import openfl.display.Graphics;
 import openfl.display.LineScaleMode;
 import openfl.display.Sprite;
@@ -25,11 +27,13 @@ import openfl.events.MouseEvent;
 import openfl.geom.Matrix;
 import openfl.text.TextField;
 using flixel.util.FlxBitmapDataUtil;
+#end
 
 /**
  * An output window that lets you paste BitmapData in the debugger overlay.
  */
 class BTreeInspectorWindow extends DebugToolWindow {
+	#if FLX_DEBUG
 	static inline var FOOTER_HEIGHT = 48;
 	static inline var CTX_WIDTH = 200;
 
@@ -484,6 +488,7 @@ class BTreeInspectorWindow extends DebugToolWindow {
 	inline function get__curBitmap():BitmapData {
 		return _entries[_curIndex].bitmap;
 	}
+	#end
 }
 
 typedef TreeVisEntry = {
@@ -491,4 +496,3 @@ typedef TreeVisEntry = {
 	name:String,
 	nav:TreeNav,
 }
-#end

@@ -1,20 +1,26 @@
 package bitdecay.flixel.debug.tools.btree;
 
-#if debug
 import bitdecay.behavior.tree.BTExecutor;
-import bitdecay.behavior.tree.Node;
 import bitdecay.flixel.debug.DebugTool.BaseToolData;
-import flixel.FlxG;
-import flixel.util.FlxColor;
+
+#if FLX_DEBUG
 import openfl.display.BitmapData;
 import openfl.display.Loader;
 import openfl.events.Event;
+
+import flixel.FlxG;
+import flixel.util.FlxColor;
+
+import bitdecay.behavior.tree.Node;
+
 using flixel.util.FlxBitmapDataUtil;
+#end
 
 /**
  * An output window that lets you paste BitmapData in the debugger overlay.
  */
 class BTreeInspector extends DebugTool<BTreeInspectorWindow> {
+	#if FLX_DEBUG
 	static var iconData = [
 		[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
 		[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
@@ -164,6 +170,10 @@ class BTreeInspector extends DebugTool<BTreeInspectorWindow> {
 	public function addTree(name:String, btree:BTExecutor) {
 		pendingAdds.set(name, btree);
 	}
+
+	#else
+	public function addTree(name:String, btree:BTExecutor) {}
+	#end
 }
 
 typedef BTreeInspectorData = BaseToolData & {
@@ -176,4 +186,3 @@ typedef TreeNav = {
 	var ?xOffset:Float;
 	var ?yOffset:Float;
 }
-#end
