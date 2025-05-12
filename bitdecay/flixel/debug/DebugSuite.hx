@@ -1,7 +1,6 @@
 package bitdecay.flixel.debug;
 
 import bitdecay.flixel.system.QuickLog;
-#if debug
 import flixel.FlxBasic;
 import flixel.FlxG;
 
@@ -9,6 +8,13 @@ class DebugSuite extends FlxBasic {
 	public static var ME(default, null):DebugSuite;
 
 	public var tools:Array<DebugTool<Dynamic>> = [];
+
+	/**
+	 * Shorthand for `DebugSuite.get(cls)` to shorten typing
+	**/
+	public static function get<T>(cls:Class<T>):Null<T> {
+		return ME.getTool(cls);
+	}
 
 	/**
 	 * Helper function to allow calling debug functions without the need to worry about
@@ -22,9 +28,9 @@ class DebugSuite extends FlxBasic {
 	 *
 	 * `DebugSuite.tool(DebugDraw, (t) -> {t.drawCameraRect(0, 0, 50, 50, FlxColor.YELLOW);});`
 	**/
-	public static function tool<T>(toolClass:Class<T>, fn:(t:T) -> Void) {
+	public static function withTool<T>(toolClass:Class<T>, fn:(t:T) -> Void) {
 		#if debug
-		var tool = ME.getTool(toolClass);
+		var tool = get(toolClass);
 		if (tool == null) {
 			QuickLog.warn('no tool found for "${toolClass}');
 			return;
@@ -41,13 +47,18 @@ class DebugSuite extends FlxBasic {
 
 		ME = new DebugSuite();
 		ME.tools = tools;
+		#if FLX_DEBUG
 		ME.initSuite();
+		#end
 	}
 
 	function new() {
 		super();
 	}
 
+	/**
+	 * Gets the requested tool, if it exists. Returns null otherwise
+	**/
 	public function getTool<T>(cls:Class<T>):Null<T> {
 		for (tool in tools) {
 			if (Std.isOfType(tool, cls)) {
@@ -57,6 +68,7 @@ class DebugSuite extends FlxBasic {
 		return null;
 	}
 
+	#if FLX_DEBUG
 	function initSuite() {
 		var existingData:Dynamic = FlxG.save.data.debugSuite;
 		if (existingData == null #if forceClean || true #end) {
@@ -69,5 +81,5 @@ class DebugSuite extends FlxBasic {
 			t.init();
 		}
 	}
+	#end
 }
-#end

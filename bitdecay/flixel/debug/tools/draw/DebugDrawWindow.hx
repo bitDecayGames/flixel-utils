@@ -7,20 +7,16 @@ import flixel.util.FlxSignal.FlxTypedSignal;
 import bitdecay.flixel.debug.tools.draw.DebugDraw;
 import flixel.FlxG;
 import flixel.system.debug.DebuggerUtil;
-import flixel.system.debug.Window;
 import flixel.util.FlxColor;
 import openfl.display.BitmapData;
-import openfl.events.MouseEvent;
 import openfl.text.TextField;
+#end
 
 /**
  * A simple window that provides toggle buttons for each custom debug draw layers
 **/
 class DebugDrawWindow extends DebugToolWindow {
-	/**
-	 * How often to update the stats, in ms. The lower, the more performance-intense!
-	 */
-	static inline var UPDATE_DELAY:Int = 250;
+	#if FLX_DEBUG
 
 	public static inline var TEXT_SIZE:Int = 11;
 
@@ -103,26 +99,8 @@ class DebugDrawWindow extends DebugToolWindow {
 		fullSizeMin = nextY;
 	}
 
-	var _currentTime:Int;
-	var _lastTime:Int = 0;
-	var _updateTimer:Int = 0;
-
-	override function update() {
-		super.update();
-
-		var time:Int = _currentTime = FlxG.game.ticks;
-		var elapsed:Int = time - _lastTime;
-
-		if (elapsed > UPDATE_DELAY) {
-			elapsed = UPDATE_DELAY;
-		}
-		_lastTime = time;
-
-		_updateTimer += elapsed;
-
-		if (_updateTimer > UPDATE_DELAY) {
-			callCountLabel.text = 'Draw Calls: ${DebugDraw.ME.lastCallCount}';
-		}
+	public function updateDrawCallCount(num:Int) {
+		callCountLabel.text = 'Draw Calls: ${num}';
 	}
 
 	public function set_collapsed(newCollapse:Bool) {
@@ -193,5 +171,5 @@ class DebugDrawWindow extends DebugToolWindow {
 		FlxG.save.data.bitdecayDebug.windowY = Y;
 		FlxG.save.flush();
 	}
+	#end
 }
-#end

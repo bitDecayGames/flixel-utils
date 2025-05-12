@@ -1,6 +1,6 @@
 package bitdecay.flixel.debug.tools.btree;
 
-#if debug
+#if FLX_DEBUG
 import bitdecay.behavior.tree.BTExecutor;
 import bitdecay.behavior.tree.Node;
 import bitdecay.behavior.tree.NodeStatus;

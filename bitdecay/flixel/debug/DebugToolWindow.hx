@@ -5,7 +5,16 @@ import flixel.system.debug.Window;
 import flixel.util.FlxSignal.FlxTypedSignal;
 import flixel.util.FlxSignal;
 
+/**
+ * The base class for a debug tool window.
+ *
+ * Note: This window compiles both with and without the FLX_DEBUG flag set.
+ * This allows for easier use within projects. Any subclass of this should
+ * follow the same pattern by making it's public interface as a set of no-op
+ * calls when not running with FLX_DEBUG
+**/
 class DebugToolWindow extends Window {
+	#if FLX_DEBUG
 	public var onResize = new FlxTypedSignal<(Int, Int) -> Void>();
 	public var onReposition = new FlxTypedSignal<(Int, Int) -> Void>();
 	public var onUpdate = new FlxTypedSignal<(Float) -> Void>();
@@ -27,4 +36,5 @@ class DebugToolWindow extends Window {
 		super.reposition(X, Y);
 		onReposition.dispatch(Std.int(x), Std.int(y));
 	}
+	#end
 }
