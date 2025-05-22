@@ -92,6 +92,12 @@ class Aseprite {
 
 		var atlas = atlasCache.get(data);
 
+		var imgAsset = Path.join([Path.directory(data), atlas.meta.image]);
+
+		if (!alreadyCached(imgAsset)) {
+			loadAsepriteAtlas(data);
+		}
+
 		var regex = ~/(.*)_(\d+)/;
 		var matches = regex.match(sliceName);
 
@@ -137,7 +143,8 @@ class Aseprite {
 	 * loads the requested slice image from the atlas onto the provided sprite
 	**/
 	public static function loadSlice(into:FlxSprite, data:String, sliceName:String) {
-		into.frame = getSliceFrame(data, sliceName);
+		var sliceFrame = getSliceFrame(data, sliceName);
+		into.frame = sliceFrame;
 		into.width = into.frame.frame.width;
 		into.height = into.frame.frame.height;
 	}
