@@ -34,7 +34,10 @@ class Window extends FlxSpriteContainer {
 
 	public var objects = new FlxSpriteContainer();
 
-	public var padding:Int;
+	/**
+	 * pixels between the border and where content is auto-aligned within the window
+	**/
+	public var padding:Int = 0;
 	public var layout:Layout;
     public var gridCells:Array<OccupiedCell> = [];
 
