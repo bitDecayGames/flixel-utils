@@ -18,7 +18,9 @@ class FlxCameraExt {
 		return p;
 	}
 
-	// project will project a world point through a camera and produce a screen coordinate
+	/**
+	 * Project a world point through a camera and produce a screen coordinate
+	**/ 
 	public static function project(cam:FlxCamera, worldPoint:FlxPoint, ?p:FlxPoint):FlxPoint {
 		if (p == null) {
 			p = FlxPoint.get();
@@ -35,7 +37,9 @@ class FlxCameraExt {
 		return p;
 	}
 
-	// unproject will take a screen coordinate and return a world coordinate via the given camera
+	/**
+	 * Takes a screen coordinate and return a world coordinate via the given camera
+	**/
 	public static function unproject(cam:FlxCamera, screenPoint:FlxPoint, ?p:FlxPoint):FlxPoint {
 		if (p == null) {
 			p = FlxPoint.get();
