@@ -67,6 +67,26 @@ class Align {
 			}
 		}
 	}
+
+	/**
+	 * Aligns `a` to butt up against `b` on the provided side
+	 *
+	 * @param side    The side of `b` to move `a` to butt up against
+	 * @param spacing Optional spacing offset if a gap between `a` and `b` is desired
+	**/
+	public static function stack(a:FlxObject, b:FlxObject, side:FlxDirectionFlags, spacing:Float = 0) {
+		switch(side) {
+			case UP:
+				a.y = b.y - a.height - spacing;
+			case DOWN:
+				a.y = b.y + b.height + spacing;
+			case LEFT:
+				a.x = b.x - a.width - spacing;
+			case RIGHT:
+				a.x = b.x + b.height + spacing;
+			default:
+		}
+	}
 }
 
 enum Feature {
