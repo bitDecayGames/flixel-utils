@@ -5,7 +5,6 @@ import flixel.math.FlxRect;
 import flixel.util.FlxPool;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.FlxBasic;
-import flixel.util.FlxColor;
 import flixel.system.FlxQuadTree;
 import flixel.FlxG;
 import flixel.FlxObject;
@@ -24,15 +23,18 @@ class RayTools {
 	 *
 	 * @param rays    the set of rays to cast
 	 * @param objects either an object or group of objects to cast against. Same rules as what you'd pass to FlxG.overlap
+	 * @param bounds  optional bounds to use for the ray. defaults to FlxG.worldBounds if not provided
 	 *
 	 * @return        true if any intersections were found, false otherwise
 	**/
-	public static function castAll(rays:Array<Ray>, objects:FlxBasic):Bool {
-		var wb = FlxG.worldBounds;
+	public static function castAll(rays:Array<Ray>, objects:FlxBasic, bounds:FlxRect = null):Bool {
+		if (bounds == null) {
+			bounds = FlxG.worldBounds;
+		}
 		if (qt == null) {
-			qt = FlxQuadTree.recycle(wb.x, wb.y, wb.width, wb.height);
+			qt = FlxQuadTree.recycle(bounds.x, bounds.y, bounds.width, bounds.height);
 		} else {
-			qt.reset(wb.x, wb.y, wb.width, wb.height);
+			qt.reset(bounds.x, bounds.y, bounds.width, bounds.height);
 		}
 
 		if (rayGroup == null) {
@@ -40,7 +42,7 @@ class RayTools {
 		}
 		rayGroup.clear();
 		for (ray in rays) {
-			trimToBounds(ray, wb);
+			trimToBounds(ray, bounds);
 			if (ray.start == null || ray.end == null) {
 				// this ray does not intersect our bounds, so don't add it
 				continue;
@@ -69,11 +71,12 @@ class RayTools {
 	 * @param start   the starting point of the ray
 	 * @param end     the ending point of the ray
 	 * @param objects either an object or group of objects to cast against. Same rules as what you'd pass to FlxG.overlap
+	 * @param bounds  optional bounds to use for the ray. defaults to FlxG.worldBounds if not provided
 	 *
 	 * @return        the closest object intersected along the ray's path
 	**/
-	public static function castOne(ray:Ray, objects:FlxBasic):FlxObject {
-		castAll([ray], objects);
+	public static function castOne(ray:Ray, objects:FlxBasic, bounds:FlxRect = null):FlxObject {
+		castAll([ray], objects, bounds);
 		return ray.obj;
 	}
 

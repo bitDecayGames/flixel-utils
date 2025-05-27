@@ -1,12 +1,14 @@
-package states.transitions;
+package bitdecay.flixel.transitions;
 
 import flixel.FlxSprite;
 import flixel.FlxG;
 import flixel.FlxSubState;
 
-// Transition using the provided sprite. It either tiles it across the screen, or stretches
-// it to fill the screen. It plays the specified animation, then calls the provided callback
-// and closes.
+/**
+ * Transition using the provided sprite. It either tiles it across the screen, or stretches
+ * it to fill the screen. It plays the specified animation, then calls the provided callback
+ * and closes.
+ **/
 class TiledSpriteTransition extends FlxSubState {
 	var callback:()->Void;
 
@@ -24,10 +26,12 @@ class TiledSpriteTransition extends FlxSubState {
 					add(t);
 					t.loadGraphicFromSprite(base);
 					t.scrollFactor.set();
-					t.animation.play(animName);
-					if (first) {
-						t.animation.finishCallback = animDone;
-						first = false;
+					if (animName != null && animName != "") {
+						t.animation.play(animName);
+						if (first) {
+							t.animation.onFinish.add(animDone);
+							first = false;
+						}
 					}
 				}
 			}
@@ -37,8 +41,10 @@ class TiledSpriteTransition extends FlxSubState {
 			sprite.screenCenter();
 			sprite.scale.set(FlxG.width / sprite.width, FlxG.height / sprite.height);
 			sprite.scrollFactor.set();
-			sprite.animation.finishCallback = animDone;
-			sprite.animation.play(animName);
+			if (animName != null && animName != "") {
+				sprite.animation.onFinish.add(animDone);
+				sprite.animation.play(animName);
+			}
 			add(sprite);
 		}
 	}
