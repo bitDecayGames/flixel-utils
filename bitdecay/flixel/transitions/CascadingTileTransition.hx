@@ -84,25 +84,23 @@ class CascadingTileTransition extends FlxSubState {
 		lineStart.x = dir.x >= 0 ? 0 : gridWidth * tileWidth;
 		lineStart.y = dir.y >= 0 ? 0 : gridHeight * tileHeight;
 
-		// if ((lineStart.x > 0 && normal.x > 0) || (lineStart.x == 0 && normal.x < 0)) {
-		// 	normal.scale(-1);
-		// }
-
 		var endScale = 0.0;
 		sweepDir = 1;
 		if (Math.abs(dir.x) >= Math.abs(dir.y)) {
 			// x-component larger, so sweep horizontally
-			if (lineStart.x == 0) {
-				if (lineStart.y == 0 && normal.quadrant() != BOTTOM_LEFT) {
-					normal.scale(-1);
-				} else if (normal.quadrant() != TOP_LEFT) {
-					normal.scale(-1);
-				}
-			} else {
-				if (lineStart.y == 0 && normal.quadrant() != BOTTOM_RIGHT) {
-					normal.scale(-1);
-				} else if (normal.quadrant() != TOP_RIGHT) {
-					normal.scale(-1);
+			if (dir.y != 0) {
+				if (lineStart.x == 0) {
+					if (lineStart.y == 0 && normal.quadrant() != BOTTOM_LEFT) {
+						normal.scale(-1);
+					} else if (normal.quadrant() != BOTTOM_LEFT) {
+						normal.scale(-1);
+					}
+				} else {
+					if (lineStart.y == 0 && normal.quadrant() != BOTTOM_RIGHT) {
+						normal.scale(-1);
+					} else if (normal.quadrant() != TOP_RIGHT) {
+						normal.scale(-1);
+					}
 				}
 			}
 			
@@ -111,19 +109,22 @@ class CascadingTileTransition extends FlxSubState {
 			
 		} else {
 			// y-component larger, so sweep vertically
-			if (lineStart.y == 0) {
-				if (lineStart.x == 0 && normal.quadrant() != TOP_RIGHT) {
-					normal.scale(-1);
-				} else if (normal.quadrant() != TOP_LEFT) {
-					normal.scale(-1);
-				}
-			} else {
-				if (lineStart.x == 0 && normal.quadrant() != BOTTOM_RIGHT) {
-					normal.scale(-1);
-				} else if (normal.quadrant() != BOTTOM_LEFT) {
-					normal.scale(-1);
+			if (dir.x != 0) {
+				if (lineStart.y == 0) {
+					if (lineStart.x == 0 && normal.quadrant() != TOP_RIGHT) {
+						normal.scale(-1);
+					} else if (normal.quadrant() != TOP_LEFT) {
+						normal.scale(-1);
+					}
+				} else {
+					if (lineStart.x == 0 && normal.quadrant() != BOTTOM_RIGHT) {
+						normal.scale(-1);
+					} else if (normal.quadrant() != BOTTOM_RIGHT) {
+						normal.scale(-1);
+					}
 				}
 			}
+
 			endScale = Math.abs(camera.width / normal.x);
 			sweepDir = lineStart.y == 0 ? 1 : -1;
 		}

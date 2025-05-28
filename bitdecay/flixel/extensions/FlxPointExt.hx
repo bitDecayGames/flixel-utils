@@ -46,19 +46,19 @@ class FlxPointExt {
 
 	public static function quadrant(point:FlxPoint):Quadrant {
 		var d = point.degrees;
-		if (d >= 0 && d <= 90) {
+		if (d <= 0 && d > -90) {
 			return TOP_RIGHT;
 		}
 
-		if (d > 90 && d <= 180) {
+		if (d <= -90 && d > -180) {
 			return TOP_LEFT;
 		}
 
-		if (d < 0 && d >= -90) {
+		if (d > 0 && d <= 90) {
 			return BOTTOM_RIGHT;
 		}
 
-		if (d < -90 && d >= -180) {
+		if (d > 90 && d <= 180) {
 			return BOTTOM_LEFT;
 		}
 
