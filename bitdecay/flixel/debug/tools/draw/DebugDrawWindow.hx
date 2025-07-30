@@ -127,49 +127,5 @@ class DebugDrawWindow extends DebugToolWindow {
 			onCollapseToggle.dispatch(newCollapse);
 			return collapsed = newCollapse;
 	}
-
-
-	function loadData() {
-		if (!FlxG.save.isBound)
-			return;
-
-		if (FlxG.save.data.bitdecayDebug == null)
-		{
-			initDebugLayerSave();
-		}
-
-		for (key => value in DebugDraw.layer_enabled) {
-			if (!FlxG.save.data.bitdecayDebug.layers.exists(key)) {
-				FlxG.save.data.bitdecayDebug.layers.set(key, value);
-			}
-
-			if (!FlxG.save.data.bitdecayDebug.layers.get(key)) {
-				DebugDraw.layer_enabled[key] = false;
-				labels.get(key).backgroundColor = FlxColor.GRAY;
-			}
-		}
-
-		collapsed = FlxG.save.data.bitdecayDebug.collapsed;
-		reposition(FlxG.save.data.bitdecayDebug.windowX, FlxG.save.data.bitdecayDebug.windowY);
-	}
-
-	function initDebugLayerSave() {
-		FlxG.save.data.bitdecayDebug = {
-			enabled: false,
-			collapsed: false,
-			windowX: 0,
-			windowY: 0,
-			layers: [for (name => _ in DebugDraw.layer_enabled) name=>true ]
-		};
-		FlxG.save.flush();
-	}
-
-	override function reposition(X:Float, Y:Float) {
-		super.reposition(X, Y);
-
-		FlxG.save.data.bitdecayDebug.windowX = X;
-		FlxG.save.data.bitdecayDebug.windowY = Y;
-		FlxG.save.flush();
-	}
 	#end
 }
