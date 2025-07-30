@@ -11,8 +11,8 @@ import flixel.FlxG;
 import flixel.math.FlxMath;
 import flixel.math.FlxPoint;
 import flixel.system.debug.DebuggerUtil;
-import flixel.system.debug.FlxDebugger.GraphicArrowLeft;
-import flixel.system.debug.FlxDebugger.GraphicArrowRight;
+// import flixel.system.debug.FlxDebugger.GraphicArrowLeft;
+// import flixel.system.debug.FlxDebugger.GraphicArrowRight;
 import flixel.system.debug.Window;
 import flixel.system.ui.FlxSystemButton;
 import flixel.util.FlxColor;
@@ -107,7 +107,8 @@ class BTreeInspectorWindow extends DebugToolWindow {
 		_ui = new Sprite();
 		_ui.y = 2;
 
-		_buttonLeft = new FlxSystemButton(new GraphicArrowLeft(0, 0), previous);
+		// _buttonLeft = new FlxSystemButton(new GraphicArrowLeft(0, 0), previous);
+		_buttonLeft = new FlxSystemButton(null, previous);
 
 		_dimensionsText = DebuggerUtil.createTextField();
 
@@ -121,7 +122,8 @@ class BTreeInspectorWindow extends DebugToolWindow {
 		});
 		_buttonText.addChild(_counterText);
 
-		_buttonRight = new FlxSystemButton(new GraphicArrowRight(0, 0), next);
+		// _buttonRight = new FlxSystemButton(new GraphicArrowRight(0, 0), next);
+		_buttonRight = new FlxSystemButton(null, next);
 		_buttonRight.x = 60;
 
 		_ui.addChild(_buttonLeft);
