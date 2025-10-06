@@ -83,7 +83,7 @@ class Align {
 			case LEFT:
 				a.x = b.x - a.width - spacing;
 			case RIGHT:
-				a.x = b.x + b.height + spacing;
+				a.x = b.x + b.width + spacing;
 			default:
 		}
 	}
