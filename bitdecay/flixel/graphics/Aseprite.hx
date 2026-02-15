@@ -187,7 +187,7 @@ class Aseprite {
 				// we use the slice size here. Unclear if this will cause issues elsewhere
 				final sourceSize = FlxPoint.get(key.bounds.w, key.bounds.h);
 				final offset = FlxPoint.get(refFrame.spriteSourceSize.x, refFrame.spriteSourceSize.y);
-				final duration = (useFrameDuration && refFrame.duration != null) ? refFrame.duration / 1000 : 0;
+				final duration = (useFrameDuration && refFrame.duration > 0) ? refFrame.duration / 1000 : 0;
 				frames.addAtlasFrame(frameRect, sourceSize, offset, frameName, 0, false, false, duration);
 			}
 		} else {
