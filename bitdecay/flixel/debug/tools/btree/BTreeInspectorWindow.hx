@@ -11,8 +11,13 @@ import flixel.FlxG;
 import flixel.math.FlxMath;
 import flixel.math.FlxPoint;
 import flixel.system.debug.DebuggerUtil;
+// flixel 6.1.0 moved the debugger arrow graphics out of FlxDebugger into flixel.system.debug.Icon
+#if (flixel >= version("6.1.0"))
+import flixel.system.debug.Icon;
+#else
 import flixel.system.debug.FlxDebugger.GraphicArrowLeft;
 import flixel.system.debug.FlxDebugger.GraphicArrowRight;
+#end
 import flixel.system.debug.Window;
 import flixel.system.ui.FlxSystemButton;
 import flixel.util.FlxColor;
@@ -107,7 +112,7 @@ class BTreeInspectorWindow extends DebugToolWindow {
 		_ui = new Sprite();
 		_ui.y = 2;
 
-		_buttonLeft = new FlxSystemButton(new GraphicArrowLeft(0, 0), previous);
+		_buttonLeft = new FlxSystemButton(#if (flixel >= version("6.1.0")) Icon.arrowLeft #else new GraphicArrowLeft(0, 0) #end, previous);
 
 		_dimensionsText = DebuggerUtil.createTextField();
 
@@ -121,7 +126,7 @@ class BTreeInspectorWindow extends DebugToolWindow {
 		});
 		_buttonText.addChild(_counterText);
 
-		_buttonRight = new FlxSystemButton(new GraphicArrowRight(0, 0), next);
+		_buttonRight = new FlxSystemButton(#if (flixel >= version("6.1.0")) Icon.arrowRight #else new GraphicArrowRight(0, 0) #end, next);
 		_buttonRight.x = 60;
 
 		_ui.addChild(_buttonLeft);
